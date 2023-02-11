@@ -1,0 +1,113 @@
+$font-size: 25px;
+$wheelPadding: 10px;
+$itemPadding: 5px;
+$item-size: $font-size*1.15+ $itemPadding*2;
+$height: $item-size*5 +$wheelPadding*2;
+
+
+.DatePicker{
+  opacity: 0;
+  height: 0;
+
+  &.opened {
+    opacity: 1;
+    height: $height;
+    transition:
+            height 0.35s ease-in-out,
+            opacity 0.3s ease;
+  ;
+  }
+
+  display: grid;
+  z-index: 10;
+  background-color: #2C2F33;
+  font-size: $font-size;
+  grid-template-columns: 4fr 5fr 4fr;
+  overflow: hidden;
+  padding-top: $wheelPadding;
+  box-sizing: border-box;
+  border-bottom: 2px solid #ea77fd;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  position: relative;
+
+  .wheel {
+    //height: $height;
+    display: flex;
+    flex-direction: column;
+    margin-left: 30px;
+    padding-bottom: $wheelPadding;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+
+    //invisible scrollbar
+    scrollbar-width: none; //for mozila support
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &:before {
+      content: '';
+      height: 25px;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(180deg, rgba(44,47,51,1) 0%, rgba(44,47,51,0.6) 41%, rgba(44,47,51,0) 100%);
+      pointer-events: none;
+    }
+
+    &:after {
+      content: '';
+      height: 25px;
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(0, rgba(44,47,51,1) 0%, rgba(44,47,51,0.6) 41%, rgba(44,47,51,0) 100%);
+      pointer-events: none;
+    }
+    .void {
+      min-height: 38.75px;
+      width: 12px;
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+    }
+    .item {
+      display: flex;
+      padding: $itemPadding 0;
+      color: #737373;
+      cursor: pointer;
+      scroll-snap-align: start;
+      scroll-snap-stop: normal;
+
+      &.active {
+        color: white;
+        font-weight: 500;
+      }
+
+      .weekDay {
+        color: #9f9b9b;
+        font-size: 17px;
+        padding-left: 4px;
+      }
+    }
+  }
+
+  &:before {
+    content: '';
+    width: 100%;
+    height: $item-size;
+    background: none;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 1px rgba(60, 66, 70, 0.8);
+    position: absolute;
+    top: $item-size*2 + 10px;
+    z-index: 0;
+
+    pointer-events: none;
+  }
+}
