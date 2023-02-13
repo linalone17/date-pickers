@@ -2,19 +2,21 @@ $font-size: 25px;
 $wheelPadding: 10px;
 $itemPadding: 5px;
 $item-size: $font-size*1.15+ $itemPadding*2;
-$height: $item-size*5 +$wheelPadding*2;
+$date-picker-height: $item-size*5 +$wheelPadding*2;
 
 
 .DatePicker{
   opacity: 0;
-  height: 0;
+  height: 100px;
+  pointer-events: none;
 
   &.opened {
     opacity: 1;
-    height: $height;
+    height: $date-picker-height;
+    pointer-events: auto;
     transition:
             height 0.35s ease-in-out,
-            opacity 0.3s ease;
+            opacity 0.2s ease
   ;
   }
 
@@ -32,7 +34,6 @@ $height: $item-size*5 +$wheelPadding*2;
   position: relative;
 
   .wheel {
-    //height: $height;
     display: flex;
     flex-direction: column;
     margin-left: 30px;
@@ -94,6 +95,7 @@ $height: $item-size*5 +$wheelPadding*2;
         font-size: 17px;
         padding-left: 4px;
       }
+
     }
   }
 
