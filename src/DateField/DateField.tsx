@@ -73,10 +73,10 @@ export const DateField: React.FC<DateFieldProps> = ({
     const [rawInputValue, setRawInputValue] = useState<string>(
         initialDate ? initialDate.toLocaleDateString() : ''
     );
-
+    const [date, setDate] = useState<Date>(initialDate ? initialDate : new Date());
     const [isDatePickerOpened, setIsDatePickerOpened] = useState<boolean>(false);
-    const [datePickerState, setDatePickerState] = useState<Date>(new Date(2012,2,11));
     const ref = useRef<HTMLInputElement>(null);
+
     useOutsideClick(ref, () => {
         setIsDatePickerOpened(false);
     })
@@ -86,8 +86,9 @@ export const DateField: React.FC<DateFieldProps> = ({
         if (typeof value !== 'undefined') {
             setRawInputValue(value);
             const date = getDateFromString(value);
+            console.log('here', value, date)
             if (date) {
-                setDatePickerState(date);
+                setDate(date);
             }
         }
     }
@@ -99,7 +100,6 @@ export const DateField: React.FC<DateFieldProps> = ({
     function switchIsDatePickerOpened () {
         setIsDatePickerOpened((prev) => (!prev));
     }
-    console.log('DateField:', datePickerState);
     return (
         <div className={styles.DateField} ref={ref}>
             <input className={styles.Input}
@@ -116,7 +116,7 @@ export const DateField: React.FC<DateFieldProps> = ({
                 <DatePicker
                     isOpened={isDatePickerOpened}
 
-                    date={new Date(datePickerState)}
+                    date={date}
                     onDatePickerChange={handleDateChangeFromDatePicker}
                     initialDate={initialDate}
                     dateFrom={dateFrom}

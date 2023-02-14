@@ -32,6 +32,8 @@ interface DatePickerProps {
 
 interface WheelProps {
     date: Date;
+    flow: 'up' | 'down';
+
     changeDate: (date: Date) => void;
     dateFrom?: Date;
     dateTo?: Date;
@@ -56,7 +58,9 @@ function createYearValuesArray(year: number, yearFrom?:number, yearTo?:number): 
     return createArrayFromInterval(intervalStart, intervalEnd);
 }
 
-const YearWheel: React.FC<WheelProps> = ({date, changeDate, dateFrom, dateTo}) => {
+const YearWheel: React.FC<WheelProps> = ({
+    date, flow, changeDate, dateFrom, dateTo}
+) => {
     const [yearValuesArray, setYearValuesArray] = useState<Array<number>>(() =>
         {return createYearValuesArray(
             date.getFullYear(),
@@ -64,14 +68,28 @@ const YearWheel: React.FC<WheelProps> = ({date, changeDate, dateFrom, dateTo}) =
             dateTo?.getFullYear()
         )}
     );
+
     const year = date.getFullYear();
     const wheelRef = useRef<HTMLDivElement>(null);
+    const isScrollAllowedRef = useRef<boolean>(true);
 
-    useLayoutEffect(() => {
-        if (wheelRef.current) {
-            wheelRef.current.scrollTop = yearValuesArray.indexOf(year)*wheelItemSize;
+    useEffect(() => {
+        if (flow === 'down') {
+            scrollTo(yearValuesArray.indexOf(year));
         }
-    }, [wheelRef.current])
+    }, [wheelRef, year])
+
+
+    function scrollTo(index: number) {
+        console.log('scroll fired')
+        if (wheelRef.current) {
+            isScrollAllowedRef.current = false;
+
+            wheelRef.current.scrollTop = (index)*wheelItemSize;
+
+            isScrollAllowedRef.current = true;
+        }
+    }
 
     function changeDateYear(year: number) {
         changeDate(
@@ -80,13 +98,11 @@ const YearWheel: React.FC<WheelProps> = ({date, changeDate, dateFrom, dateTo}) =
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, value: number) {
-        if (!event.currentTarget.parentElement) {
-            return
-        }
-        event.currentTarget.parentElement.scrollTop = yearValuesArray.indexOf(value)*wheelItemSize;
+        changeDateYear(value);
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
+        if (!isScrollAllowedRef.current) return;
         if (!event.currentTarget) {
             return
         }
@@ -148,15 +164,26 @@ const YearWheel: React.FC<WheelProps> = ({date, changeDate, dateFrom, dateTo}) =
 //  TODO: React.memo, same as year;
 //        but it doesn't seem to be slow YET.
 const monthValuesArray: Array<number> = createArrayFromInterval(0, 11);
-const MonthWheel = ({date, changeDate}:WheelProps) => {
+const MonthWheel: React.FC<WheelProps> = ({date, flow, changeDate}:WheelProps) => {
     const wheelRef = useRef<HTMLDivElement>(null);
     const month = date.getMonth();
+    const isScrollAllowedRef = useRef<boolean>(true);
 
-    useLayoutEffect(() => {
-        if (wheelRef.current) {
-            wheelRef.current.scrollTop = month*wheelItemSize;
+    useEffect(() => {
+        if (flow === 'down') {
+            scrollTo(month);
         }
     }, [wheelRef.current, month])
+
+    function scrollTo(index: number) {
+        if (wheelRef.current) {
+            isScrollAllowedRef.current = false;
+
+            wheelRef.current.scrollTop = (index)*wheelItemSize;
+
+            isScrollAllowedRef.current = true;
+        }
+    }
 
     function changeDateMonth (month: number) {
         changeDate(
@@ -165,13 +192,12 @@ const MonthWheel = ({date, changeDate}:WheelProps) => {
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, value: number) {
-        if (!event.currentTarget.parentElement) {
-            return
-        }
-        event.currentTarget.parentElement.scrollTop = monthValuesArray.indexOf(value)*wheelItemSize;
+        changeDateMonth(value);
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
+        if (!isScrollAllowedRef.current) return;
+
         if (!event.currentTarget) {
             return
         }
@@ -231,32 +257,33 @@ function createDayValuesArray(date: Date): Array<number> {
     return createArrayFromInterval(1, getMonthDaysAmount(date)); // e.g. [1...31]
 }
 
-const DayWheel: React.FC<WheelProps> = ({
-    date, changeDate, dateFrom, dateTo
+const DayWheel: React.FC<WheelProps> =({
+    date, flow, changeDate, dateFrom, dateTo
 }) => {
     const day = date.getDate();
+
     const dayValuesArray = createDayValuesArray(date);
 
-    const isScrollHandleAllowedRef = useRef<boolean>(true);
-    const switchScrollHandleAllowed = () => {
-        isScrollHandleAllowedRef.current = !isScrollHandleAllowedRef.current;
-    }
-    console.log('DayWheel:', date, day)
     const wheelRef = useRef<HTMLDivElement>(null);
 
+    const isScrollAllowedRef = useRef<boolean>(true);
+
+    // initialize date
     useEffect(() => {
-        scrollTo(day - 1);
-        console.log(day);
+        if (flow === 'down') {
+            scrollTo(day - 1);
+        }
     }, [wheelRef, day])
 
 
     function scrollTo(index: number) {
-        isScrollHandleAllowedRef.current = false;
         if (wheelRef.current) {
+            isScrollAllowedRef.current = false;
+
             wheelRef.current.scrollTop = (index)*wheelItemSize;
+
+            isScrollAllowedRef.current = true;
         }
-        console.log(wheelRef.current!.scrollTop, 'here')
-        isScrollHandleAllowedRef.current = true;
     }
 
     function changeDateDay(day: number) {
@@ -266,7 +293,7 @@ const DayWheel: React.FC<WheelProps> = ({
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
-        if (!isScrollHandleAllowedRef.current) return;
+        if (!isScrollAllowedRef) return;
         const scrollTop = event.currentTarget.scrollTop;
         const scrollOffset = (scrollTop) % wheelItemSize;
 
@@ -308,7 +335,7 @@ const DayWheel: React.FC<WheelProps> = ({
                     }}
                 >
                     <div>{value}</div>
-                        {value === day && <div className={styles.weekDay}>
+                    {value === day && <div className={styles.weekDay}>
                         {getWeekDayName(new Date(date)).short}
                     </div>}
                 </div>
@@ -330,14 +357,27 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         dateFrom,
         dateTo,
 }) => {
-    initialDate = initialDate ?? new Date();
-    const [dateR, setDate] = useState<Date>(initialDate);
-    const changeDate = (date: Date) => {
-        onDatePickerChange(date);
-        setDate(date);
-    }
+    const [dateState, setDateState] = useState<
+        {value: Date, flow: 'up' | 'down'}
+    >({
+        value: initialDate ? initialDate : new Date(),
+        flow: 'down'}
+    );
 
-    console.log('DatePickerWheels:', date);
+    useEffect(() => {
+        setDateState({
+            value: date,
+            flow: 'down'
+        })
+    }, [date]);
+
+    const changeDate = (date: Date) => {
+        setDateState({
+            value: date,
+            flow: 'up'
+        })
+        onDatePickerChange(date);
+    }
 
     return (
         <div className={cn(
@@ -345,17 +385,23 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                 {[styles.opened]: isOpened}
         )}
         >
-            <DayWheel date={new Date(dateR)}
+            <DayWheel date={dateState.value}
+                      flow={dateState.flow}
+
                       changeDate={changeDate}
                       dateFrom={dateFrom}
                       dateTo={dateTo}
             />
-            <MonthWheel date={dateR}
+            <MonthWheel date={dateState.value}
+                        flow={dateState.flow}
+
                         changeDate={changeDate}
                         dateFrom={dateFrom}
                         dateTo={dateTo}
             />
-            <YearWheel date={dateR}
+            <YearWheel date={dateState.value}
+                       flow={dateState.flow}
+
                        changeDate={changeDate}
                        dateFrom={dateFrom}
                        dateTo={dateTo}

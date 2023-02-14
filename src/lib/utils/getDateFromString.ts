@@ -8,12 +8,14 @@ export function getDateFromString(dateString: string): Date | null {
         return null
     }
 
-    const [day, month, year] = dateString.split('.').map(str => parseInt(str))
+    let [day, month, year] = dateString.split('.').map(str => parseInt(str));
+    month = month - 1;
+
     if (day === 0 || month === 0 || year === 0) {
         return null
     }
 
-    if (day > getMonthDaysAmount(month - 1, year)) {
+    if (day > getMonthDaysAmount(month, year)) {
         return null
     }
     // @ts-ignore

@@ -42,7 +42,7 @@ $date-picker-height: $item-size*5 +$wheelPadding*2;
     overflow-y: scroll;
     overflow-x: hidden;
     scroll-snap-type: y proximity;
-    scroll-behavior: smooth;
+    scroll-behavior: unset;
 
     //invisible scrollbar
     scrollbar-width: none; //for mozila support
