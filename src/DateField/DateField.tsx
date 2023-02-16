@@ -1,13 +1,15 @@
-import React, {useReducer, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import styles from './DateField.module.scss';
-import calendar from '../img/calendar.svg';
+import calendar from './assets/img/calendar.svg';
 
-import {DatePickerWheels as DatePicker} from "../DatePickerWheels";
-import {useOutsideClick} from "../hooks";
-import {getDateFromString} from "../lib/utils";
+import {DatePickerWheels} from "./components/DatePickerWheels";
+import {DatePickerCalendar} from "./components/DatePickerCalendar";
+import {useOutsideClick} from "../shared/hooks";
+import {getDateFromString, getStringFromDate} from "./utils";
 
 interface DateFieldProps {
+    variant: 'wheels' | 'calendar';
     initialDate?: Date;
     dateFrom?: Date;
     dateTo?: Date;
@@ -64,48 +66,69 @@ function normalizeRawInputValue(newValue: string, oldValue:string): string | voi
     return newValue
 }
 
-
 export const DateField: React.FC<DateFieldProps> = ({
     initialDate,
     dateFrom,
     dateTo,
+    variant
 }) => {
     const [rawInputValue, setRawInputValue] = useState<string>(
-        initialDate ? initialDate.toLocaleDateString() : ''
+        initialDate ? getStringFromDate(initialDate) : ''
     );
-    const [date, setDate] = useState<Date>(initialDate ? initialDate : new Date());
-    const [isDatePickerOpened, setIsDatePickerOpened] = useState<boolean>(false);
-    const ref = useRef<HTMLInputElement>(null);
 
-    useOutsideClick(ref, () => {
+    // used only to change DatePicker props, may differ from datepicker dateState
+    const [datePickerProps, setDatePickerProps] = useState<Date>(initialDate ? initialDate : new Date());
+
+    const [isDatePickerOpened, setIsDatePickerOpened] = useState<boolean>(false);
+    const dateFieldRef = useRef<HTMLInputElement>(null);
+
+    useOutsideClick(dateFieldRef, () => {
         setIsDatePickerOpened(false);
     })
 
+    // closes datepicker dropdown on tab
+    useEffect(() => {
+        const handler = (event: KeyboardEvent) => {
+            if (event.key !== 'Tab') return;
+            setIsDatePickerOpened(false);
+        }
+
+        document.addEventListener('keydown', handler);
+        return () => {
+            document.removeEventListener('keydown', handler)
+        };
+    },[])
+
+    // normalize input -> change input field -> if valid change datepicker props
     function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
         const value = normalizeRawInputValue(event.target.value, rawInputValue);
         if (typeof value !== 'undefined') {
             setRawInputValue(value);
             const date = getDateFromString(value);
-            console.log('here', value, date)
             if (date) {
-                setDate(date);
+                console.log('set datepicker props')
+                setDatePickerProps(date);
             }
         }
     }
 
     function handleDateChangeFromDatePicker (date: Date) {
-        setRawInputValue(date.toLocaleDateString());
+        setRawInputValue(getStringFromDate(date));
     }
 
     function switchIsDatePickerOpened () {
         setIsDatePickerOpened((prev) => (!prev));
     }
+
     return (
-        <div className={styles.DateField} ref={ref}>
+        <div
+            className={styles.DateField}
+            ref={dateFieldRef}
+        >
             <input className={styles.Input}
                    type="text"
                    onChange={(e) => {handleChange(e)}}
-                   placeholder={new Date().toLocaleDateString()}
+                   placeholder={getStringFromDate(new Date())}
                    value={rawInputValue}
                    onFocus={() => {
                        setIsDatePickerOpened(true)
@@ -113,15 +136,28 @@ export const DateField: React.FC<DateFieldProps> = ({
             />
             <img className={styles.icon} src={calendar} onClick={switchIsDatePickerOpened}/>
             <div className={styles.DatePicker}>
-                <DatePicker
-                    isOpened={isDatePickerOpened}
+                {variant === 'wheels' ?
+                    <DatePickerWheels
+                        isOpened={isDatePickerOpened}
 
-                    date={date}
-                    onDatePickerChange={handleDateChangeFromDatePicker}
-                    initialDate={initialDate}
-                    dateFrom={dateFrom}
-                    dateTo={dateTo}
-                />
+                        date={datePickerProps}
+                        onDatePickerChange={handleDateChangeFromDatePicker}
+                        initialDate={initialDate}
+                        dateFrom={dateFrom}
+                        dateTo={dateTo}
+                    />
+                    :
+                    <DatePickerCalendar
+                        isOpened={isDatePickerOpened}
+
+                        date={datePickerProps}
+                        onDatePickerChange={handleDateChangeFromDatePicker}
+                        initialDate={initialDate}
+                        dateFrom={dateFrom}
+                        dateTo={dateTo}
+                    />
+
+                }
             </div>
         </div>
     )

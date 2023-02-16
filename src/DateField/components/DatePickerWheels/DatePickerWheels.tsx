@@ -1,28 +1,22 @@
-import React, {useState, useEffect, useRef, useReducer, useLayoutEffect} from 'react';
-
-import cn from 'classnames';
+import React, {useState, useEffect, useRef} from 'react';
 
 import {
     createArrayFromInterval,
     getMonthDaysAmount,
     copyDate,
     getWeekDayName
-} from '../lib/utils';
+} from '../../utils';
 
-import {
-    months
-} from "../lib/constants";
+import {months} from "../../constants";
 
+import cn from 'classnames';
 import styles from './DatePickerWheels.module.scss';
-import {initial} from "lodash";
-import {flushSync} from "react-dom";
 
 
 interface DatePickerProps {
     isOpened: boolean;
 
     date: Date;
-    setDate?: (date: Date) => void;
     onDatePickerChange: (date:Date) => void;
 
     initialDate?: Date;
@@ -93,12 +87,12 @@ const YearWheel: React.FC<WheelProps> = ({
 
     function changeDateYear(year: number) {
         changeDate(
-            new Date(date.setFullYear(year))
+            new Date(copyDate(date).setFullYear(year))
         )
     }
 
-    function handleClick (event: React.UIEvent<HTMLDivElement>, value: number) {
-        changeDateYear(value);
+    function handleClick (event: React.UIEvent<HTMLDivElement>, year: number) {
+        scrollTo(yearValuesArray.indexOf(year));
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
@@ -129,8 +123,6 @@ const YearWheel: React.FC<WheelProps> = ({
     function changeCurrent (year: number) {
         changeDateYear(year);
     }
-
-
 
     return (
         <div className={styles.wheel}
@@ -191,16 +183,13 @@ const MonthWheel: React.FC<WheelProps> = ({date, flow, changeDate}:WheelProps) =
         )
     }
 
-    function handleClick (event: React.UIEvent<HTMLDivElement>, value: number) {
-        changeDateMonth(value);
+    function handleClick (event: React.UIEvent<HTMLDivElement>, month: number) {
+        scrollTo(monthValuesArray.indexOf(month));
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
         if (!isScrollAllowedRef.current) return;
 
-        if (!event.currentTarget) {
-            return
-        }
         const scrollTop = event.currentTarget.scrollTop;
         const scrollOffset = (scrollTop) % wheelItemSize;
         let currentByScroll;
@@ -226,7 +215,7 @@ const MonthWheel: React.FC<WheelProps> = ({date, flow, changeDate}:WheelProps) =
         <div
             className={styles.wheel}
             ref={wheelRef}
-            onScroll={wheelRef.current ? handleScroll: undefined}
+            onScroll={handleScroll}
         >
             <div className={styles.void}></div>
             <div className={styles.void}></div>
@@ -286,6 +275,30 @@ const DayWheel: React.FC<WheelProps> =({
         }
     }
 
+    // function smoothScrollTo(index: number) {
+    //     if (!wheelRef.current) return;
+    //     const startScrollTop = wheelRef.current.scrollTop;
+    //     const finishScrollTop = index*wheelItemSize;
+    //     const scrollTopDifference = finishScrollTop - startScrollTop;
+    //
+    //     let startTimestamp: undefined | number;
+    //     function animate (timestamp: number) {
+    //         if (startTimestamp === undefined) {
+    //             startTimestamp = timestamp;
+    //         }
+    //         if (timestamp - startTimestamp >= 300) {
+    //             console.log(isScrollAllowedRef.current);
+    //             wheelRef.current!.scrollTop = finishScrollTop;
+    //             console.log('finish');
+    //             return
+    //         }
+    //         wheelRef.current!.scrollTop = startScrollTop + scrollTopDifference*((timestamp - startTimestamp)/300)
+    //         requestAnimationFrame(animate);
+    //     }
+    //     requestAnimationFrame(animate);
+    //
+    // }
+
     function changeDateDay(day: number) {
         changeDate(
             new Date(copyDate(date).setDate(day))
@@ -293,7 +306,8 @@ const DayWheel: React.FC<WheelProps> =({
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
-        if (!isScrollAllowedRef) return;
+        console.log(isScrollAllowedRef.current)
+        if (!isScrollAllowedRef.current) return;
         const scrollTop = event.currentTarget.scrollTop;
         const scrollOffset = (scrollTop) % wheelItemSize;
 
@@ -314,6 +328,10 @@ const DayWheel: React.FC<WheelProps> =({
         }
     }
 
+    function handleClick(event: React.MouseEvent<HTMLDivElement>, day: number) {
+        scrollTo(dayValuesArray.indexOf(day));
+    }
+
     return (
         <div
             className={styles.wheel}
@@ -330,13 +348,13 @@ const DayWheel: React.FC<WheelProps> =({
                         styles.item
                     )}
                     key={value}
-                    onClick={() => {
-                        changeDateDay(value)
+                    onClick={(event) => {
+                        handleClick(event, value);
                     }}
                 >
                     <div>{value}</div>
                     {value === day && <div className={styles.weekDay}>
-                        {getWeekDayName(new Date(date)).short}
+                        {getWeekDayName(date).short}
                     </div>}
                 </div>
             })}
@@ -378,7 +396,6 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         })
         onDatePickerChange(date);
     }
-
     return (
         <div className={cn(
                 styles.DatePicker,

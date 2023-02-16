@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect} from 'react';
 
 
 export function useOutsideClick(
@@ -15,7 +15,7 @@ export function useOutsideClick(
     useEffect(() => {
         document.addEventListener('click', handleClick);
         return () => {
-            document.removeEventListener('click', handleClick)
+            document.removeEventListener('click', handleClick);
         }
     }, [elementRef])
 }

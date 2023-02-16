@@ -1,0 +1,1 @@
+export {createArrayFromInterval} from './createArrayFromInterval';

@@ -1,4 +1,4 @@
-import {weekDayNames} from "../constants";
+import {weekDayNamesFromSunday as weekDayNames} from "../constants";
 
 interface WeekDayName {
     full: string;

@@ -1,0 +1,214 @@
+$dark: #23272A;
+$lessDark: #2C2F33;
+$purple: #ea77fd;
+$violet: #945dd7;
+
+$fontSize: 25px;
+$height: 200px;
+$daysGap: 10px;
+$date-picker-height: 350px;
+$calendar-height: 280px;
+
+
+.DatePicker{
+  opacity: 0;
+  height: 100px;
+  pointer-events: none;
+  user-select: none;
+
+  &.opened {
+    opacity: 1;
+    height: $date-picker-height;
+    pointer-events: auto;
+    transition:
+            height 0.35s ease-in-out,
+            opacity 0.2s ease;
+  }
+
+  z-index: 10;
+  background-color: $lessDark;
+  font-size: $fontSize;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-bottom: 2px solid $purple;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  position: relative;
+
+  .MenuBar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 20px;
+    padding: 15px;
+
+    .monthPicker {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      width: 200px;
+      background-color: $dark;
+      border: 2px solid $dark;
+      border-radius: 10px;
+      font-size: 23px;
+      .month {
+        display: inline-block;
+        margin: 0 auto;
+        .monthName:first-letter {
+          text-transform: uppercase;
+        }
+      }
+      .arrow {
+        padding: 0 7px;
+        margin: 0 5px;
+        border-radius: 10px;
+        display: inline-block;
+        font-size: 20px;
+        font-weight: 500;
+        background-color: #2C2F33;
+        cursor: pointer;
+        &:hover {
+          background-color: #393d42;
+        }
+        &.disabled {
+          pointer-events: none;
+          background-color: #6f7680;
+        }
+      }
+    }
+
+    .yearPicker {
+      height: 30px;
+      width: 70px;
+      border-radius: 10px;
+      background-color: $dark;
+      position: absolute;
+
+      right: 20px;
+      input {
+        outline: none;
+        box-shadow: none;
+        color: white;
+        height: inherit;
+        width: inherit;
+        border-radius: inherit;
+        border: none;
+        text-align: center;
+        font-size: 25px;
+      }
+    }
+
+    //&:after {
+    //  content: '';
+    //  width: 80%;
+    //  height: 2px;
+    //  position: absolute;
+    //
+    //  bottom: 0;
+    //  left: 10%;
+    //
+    //  background-color: #53575d;
+    //}
+    &:after {
+      content: '';
+      height: 28px;
+      width: 100%;
+      position: absolute;
+      z-index: 10;
+      bottom: -25px;
+      left: 0;
+
+      //background: linear-gradient(180deg,
+      //        rgba(44,47,51,1) 0%,
+      //        rgba(44,47,51,1) 30%,
+      //        rgba(44,47,51,0.99) 50%,
+      //        rgba(44,47,51,0.95) 70%,
+      //        rgba(44,47,51,0.7) 80%,
+      //        rgba(44,47,51,0) 100%
+      //);
+      pointer-events: none;
+    }
+  }
+
+  .Calendar {
+    position: relative;
+    font-size: 20px;
+    .head {
+      position: absolute;
+      width: 100%;
+      height: 51px;
+      top: -1px;
+      left: 0;
+      display: flex;
+      z-index: 100;
+      gap: $daysGap;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(44,47,51,1) 0%, rgba(44,47,51,0.6) 41%, rgba(44,47,51,0) 100%);
+
+      .day {
+        width: 40px;
+        color: $violet;
+      }
+    }
+    .body {
+      height: $calendar-height;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $daysGap;
+
+      overflow-y: scroll;
+      // scrollbar hiding
+      scrollbar-width: none; //for mozilla support
+      &::-webkit-scrollbar { //for other
+        display: none;
+      }
+
+      overscroll-behavior: none;
+      scroll-snap-type: y proximity;
+
+
+      .week {
+        display: flex;
+        gap: $daysGap;
+        scroll-snap-align: start;
+        scroll-snap-stop: normal;
+        scroll-margin-top: 30px;
+
+        .day{
+          height: 40px;
+          width: 40px;
+          box-sizing: border-box;
+          background-color: $dark;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          &:hover {
+            border: 1px solid white;
+          }
+          &.active {
+            border-color: $purple;
+          }
+          &.currentMonth {
+
+          }
+          .value{
+
+          }
+        }
+      }
+    }
+
+    &:after {
+      content: '';
+      height: 25px;
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(0, rgba(44,47,51,1) 0%, rgba(44,47,51,0.6) 41%, rgba(44,47,51,0) 100%);
+      pointer-events: none;
+    }
+  }
+}
