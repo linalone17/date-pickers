@@ -1,7 +1,7 @@
 # Date Picker
 > the most of datepickers suck...
 ### Wheels DatePicker:
-inspired by ***iOS datepicker / timer***
+inspired by ***iOS datepicker / timer*** <br>
 have the **same** functions
 #### Preview
 ![](https://github.com/linalone17/date-pickers/blob/main/other/preview.gif)
