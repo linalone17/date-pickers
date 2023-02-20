@@ -1,3 +1,9 @@
-export {months} from './months';
-export {monthNames} from './monthNames';
-export {weekDayNamesFromSunday, weekDayNamesFromMonday} from './weekDayNames';
+export {
+    months,
+    monthNames
+} from './months';
+
+export {
+    weekDayNamesFromSunday,
+    weekDayNamesFromMonday
+} from './weekDayNames';

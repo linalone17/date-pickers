@@ -1,12 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
 
 import styles from './DateField.module.scss';
-import calendar from './assets/img/calendar.svg';
+import calendar from '../../assets/img/calendar.svg';
 
-import {DatePickerWheels} from "./components/DatePickerWheels";
-import {DatePickerCalendar} from "./components/DatePickerCalendar";
-import {useOutsideClick} from "../shared/hooks";
-import {getDateFromString, getStringFromDate} from "./utils";
+import {DatePickerWheels} from "./DatePickerWheels";
+import {DatePickerCalendar} from "./DatePickerCalendar";
+import {useOutsideClick} from "../../../shared/hooks";
+import {getDateFromString, getStringFromDate} from "../../utils";
 
 interface DateFieldProps {
     variant: 'wheels' | 'calendar';
@@ -14,6 +14,12 @@ interface DateFieldProps {
     dateFrom?: Date;
     dateTo?: Date;
 }
+
+const sizes = {
+    height: 80,
+    width: 400
+}
+
 
 // TODO: make simpler with same logic
 function normalizeRawInputValue(newValue: string, oldValue:string): string | void {
@@ -26,11 +32,11 @@ function normalizeRawInputValue(newValue: string, oldValue:string): string | voi
     } else if (newValue === '.') {                             // '.' => '04.', where 04 - today
         newValue = `${new Date().getDate()}.`;
 
-    } else if (                                                //  '12' => '12.' fires on typing
-        newValue.match(/^[0-9]{2}$/g) &&
+    } else if (                                                //  '123' => '12.3' fires on typing
+        newValue.match(/^[0-9]{3}$/g) &&
         newValue.length > oldValue.length
     ) {
-        newValue = `${newValue}.`;
+        newValue = `${newValue.slice(0, 2)}.${newValue.slice(-1)}`;
 
     } else if (                                                //  '12.' => '12' fires on deleting
         newValue.match(/^[0-9]{2}\.$/g) &&
@@ -44,11 +50,11 @@ function normalizeRawInputValue(newValue: string, oldValue:string): string | voi
         const month = String(new Date().getMonth() + 1).padStart(2, '0')
         newValue = `${newValue.slice(0, -1)}${month}.`;
 
-    } else if (                                               //  '03.10' => '03.10.' fires on typing
-        newValue.match(/^[0-9]{2}\.[0-9]{2}$/g) &&
+    } else if (                                               //  '03.102' => '03.10.2' fires on typing
+        newValue.match(/^[0-9]{2}\.[0-9]{3}$/g) &&
         newValue.length > oldValue.length
     ) {
-        newValue = `${newValue}.`;
+        newValue = `${newValue.slice(0, 5)}.${newValue.slice(-1)}`;
 
     } else if (                                               //  '03.10.2' => '03.10' fires on deleting
         newValue.match(/^[0-9]{2}\.[0-9]{2}\.$/g) &&
@@ -145,6 +151,8 @@ export const DateField: React.FC<DateFieldProps> = ({
                         initialDate={initialDate}
                         dateFrom={dateFrom}
                         dateTo={dateTo}
+
+                        sizes={sizes}
                     />
                     :
                     <DatePickerCalendar
@@ -155,6 +163,8 @@ export const DateField: React.FC<DateFieldProps> = ({
                         initialDate={initialDate}
                         dateFrom={dateFrom}
                         dateTo={dateTo}
+
+                        sizes={sizes}
                     />
 
                 }

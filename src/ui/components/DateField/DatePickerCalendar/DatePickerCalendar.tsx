@@ -1,11 +1,34 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 
-import {checkDatesEquality, copyDate} from "../../utils";
-import {monthNames, weekDayNamesFromMonday as weekDayNames} from "../../constants";
+import {checkDatesEquality, copyDate, getMonthDaysAmount} from "../../../utils";
+import {monthNames, weekDayNamesFromMonday as weekDayNames} from "../../../constants";
 
 import cn from 'classnames';
 import styles from './DatePickerCalendar.module.scss'
+
+// const debounce = <T extends Function>(func: T, wait: number): T => {
+//     let isAllowed = true;
+//     let timeout: string | number | NodeJS.Timeout | undefined;
+//
+//     const returnFunc = (...args: any) => {
+//         if (isAllowed) {
+//             isAllowed = false;
+//             func(...args)
+//             timeout = setTimeout(() => {
+//                 isAllowed = true;
+//             }, wait)
+//         } else {
+//             clearTimeout(timeout);
+//             timeout = setTimeout(() => {
+//                 isAllowed = true;
+//             }, wait)
+//         }
+//     }
+//     // @ts-ignore
+//     return returnFunc as T;
+// }
+
 
 interface DatePickerCalendarProps {
     isOpened: boolean;
@@ -16,6 +39,11 @@ interface DatePickerCalendarProps {
     initialDate?: Date;
     dateFrom?: Date;
     dateTo?: Date;
+
+    sizes: {
+        height: number,
+        width: number
+    }
 }
 
 interface CalendarProps {
@@ -28,13 +56,20 @@ interface MenuBarProps {
     changeDate: (date: Date) => void;
 }
 
-function getNextDay (date: Date): Date{
+type Weeks = Array<Array<Date>>;
+type MonthStarts = Array<number>;
+
+const weekElementSize = 50;
+const scrollMarginTop = 30;
+// const padding = weekElementSize/10;
+
+function getNextDay (date: Date): Date {
     date = copyDate(date);
     date.setDate(date.getDate() + 1);
     return date
 }
 
-function getWeeksArray(year: number): Array<Array<Date>> {
+function getWeeksAndMonthStarts(year: number): [Weeks, MonthStarts] {
     const firstDate = new Date(year, 0, 1);
 
     let day;
@@ -51,47 +86,113 @@ function getWeeksArray(year: number): Array<Array<Date>> {
             day = firstDate;
             break;
         default:
-            console.log()
             day = new Date(
                 firstDate.getFullYear() - 1,
                 11,
                 31 - (firstDate.getDay() - 2)
             )
-            console.log(day.getDay())
     }
 
-    const weekArray = new Array(53);
+    const weeks = new Array(53);
+    const monthStarts = [];
 
     for (let week = 0; week < 53; week++) {
         const arr = new Array(7);
         for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
             arr[dayOfWeek] = day; //anyway immutable, getNextDay returns new Date
+            if (day.getDate() === 1 && monthStarts.length < 12) {
+                monthStarts.push(week);
+            }
             day = getNextDay(day);
         }
-        weekArray[week] = arr;
+        weeks[week] = arr;
     }
-    return weekArray
+    return [weeks, monthStarts]
 }
 
 const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
-    const day = date.getDate();
-    const month = date.getMonth();
-    const year = date.getFullYear();
 
-    const getWeeksArrayMemoized = useCallback(getWeeksArray, [year]);
-    const weeksArray = getWeeksArrayMemoized(year);
+    const [month, setMonth] = useState<number>(date.getMonth());
+    const [year, setYear] = useState<number>(date.getFullYear());
+    console.log(year);
 
-    const currentDayRef = useRef<HTMLDivElement | null>(null);
+    const getWeeksAndMonthStartsMemo = useCallback(getWeeksAndMonthStarts, [year]);
 
-    function changeCurrent (target: HTMLDivElement, day: Date) {
-        if (currentDayRef.current) {
-            currentDayRef.current.classList.remove(styles.current);
-        }
 
-        currentDayRef.current = target;
-        currentDayRef.current.classList.add(styles.current);
+    const [prevYearWeeksPreload, setPrevYearWeeksPreload] = useState<Weeks>(
+        getWeeksAndMonthStartsMemo(year - 1)[0].slice(-7)
+    );
+
+    const [nextYearWeeksPreload, setNextYearWeeksPreload] = useState<Weeks>(
+        getWeeksAndMonthStartsMemo(year + 1)[0].slice(0, 7)
+    );
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const prevYearPreloadRef = useRef<HTMLDivElement>(null);
+
+    const [weeks, monthStarts] = getWeeksAndMonthStartsMemo(year);
+
+    //
+    useEffect(() => {
+        setMonth(date.getMonth());
+        setYear(date.getFullYear());
+
+        changePreloadsByYear(year - 1);
+    },[date])
+
+    function changePreloadsByYear(year: number) {
+        setPrevYearWeeksPreload(
+            getWeeksAndMonthStartsMemo(year)[0].slice(-7)
+        );
+        setNextYearWeeksPreload(
+            getWeeksAndMonthStartsMemo(year)[0].slice(0, 7)
+        );
     }
 
+    // initial scroll on mount
+    useEffect(() => {
+        if (!calendarRef || !calendarRef.current) return;
+        calendarRef.current.scrollTo({top: 600});
+        console.log('initial scroll')
+    },[calendarRef]);
+
+    // intersection observer init
+    useEffect(() => {
+        if (!calendarRef.current || !prevYearPreloadRef.current) return;
+
+        const options = {
+            root: calendarRef.current,
+            rootMargin: '0px',
+            threshold: 0.9,
+        }
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    observer.unobserve(entry.target);
+                    console.log('fired');
+                    // calendarRef.current!.scrollTo({top: 0, behavior: 'smooth'});
+                    setTimeout(() => {
+                        setYear(prev => prev - 1)
+                        calendarRef.current!.scrollTo({top: 3030, behavior: 'auto'});
+                    }, 800)
+                }
+            })
+        }, options)
+
+        return () => {
+            observer.disconnect();
+        }
+    },[calendarRef]);
+
+    useEffect(() => {
+
+    }, [year])
+
+
+
+    function changeCurrent (target: HTMLDivElement, day: Date) {
+        changeDate(copyDate(day));
+    }
 
     return (
         <div className={styles.Calendar}>
@@ -100,12 +201,37 @@ const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
                     return <div key={day.veryShort} className={styles.day}>{day.veryShort}</div>
                 })}
             </div>
-            <div className={styles.body}>
-                <div>prev year</div>
-                {weeksArray.map((week, index) => {
-
+            <div className={styles.body}
+                 ref={calendarRef}
+            >
+                {prevYearWeeksPreload.map((week) => {
                     return <div className={cn(
+                        styles.prevYearWeeksPreload,
                         styles.week
+                    )}>
+                        {week.map((day) => {
+                            return <div className={styles.day}>
+                                <div className={styles.value}>{day.getDate()}</div>
+                            </div>
+                        })}
+                    </div>
+                })}
+
+                <div
+                    className={styles.prevYearContainer}
+                    ref={prevYearPreloadRef}
+                >
+                    <div className={styles.year}>
+                        <div className={styles.value}>{year}</div>
+                    </div>
+                </div>
+
+                {weeks.map((week, index) => {
+                    return <div className={cn(
+                        styles.week,
+                        {
+                            [styles.scrollSnapTarget]: monthStarts.includes(index)
+                        }
                     )}>
                         {week.map((day) => {
 
@@ -113,8 +239,8 @@ const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
                                 className={cn(
                                     styles.day,
                                     {
-                                        [styles.active]: checkDatesEquality(day, date),
-                                        [styles.currentMonth]: day.getMonth() === month
+                                        [styles.current]: checkDatesEquality(day, date),
+                                        [styles.ofCurrentMonth]: day.getMonth() === month
                                     }
                                 )}
                                 onClick={(event) => {
@@ -126,15 +252,49 @@ const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
                         })}
                     </div>
                 })}
-                <div>next year</div>
+
+                <div className={styles.nextYearContainer}>
+                    <div className={styles.year}>
+                        <div className={styles.value}>{year + 1}</div>
+                    </div>
+                </div>
             </div>
         </div>
     )
 }
 
 const MenuBar: React.FC<MenuBarProps> = ({date, changeDate}) => {
-    const [month, setMonth] = useState<number>(date.getMonth());
+    const month = date.getMonth();
 
+    const [year, setYear] = useState<string>(date.getFullYear().toString());
+
+    function changeMonth(month: number) {
+        changeDate(
+            new Date(copyDate(date).setMonth(month))
+        )
+    }
+
+    // changes date to year arg, same month, same day if exists
+    function changeYear(year: number) {
+        if (year === date.getFullYear()) return;
+
+        const monthDaysAmount = getMonthDaysAmount(date.getMonth(), year);
+
+        changeDate(
+            new Date(
+                year,
+                date.getMonth(),
+                date.getDate() <= monthDaysAmount ? date.getDate() : monthDaysAmount)
+        )
+
+    }
+    function handleChange(value: string) {
+        setYear(value);
+
+        if (value.match(/^[0-9]{4}$/)) {
+            changeYear(parseInt(value));
+        }
+    }
     return (
         <div className={styles.MenuBar}>
             <div className={styles.monthPicker}>
@@ -145,7 +305,7 @@ const MenuBar: React.FC<MenuBarProps> = ({date, changeDate}) => {
                     )}
                     onClick={() => {
                         if (month > 0) {
-                            setMonth(month - 1)
+                            changeMonth(month - 1)
                         }
                     }}
                 >{'<'}</div>
@@ -163,22 +323,42 @@ const MenuBar: React.FC<MenuBarProps> = ({date, changeDate}) => {
                     )}
                      onClick={() => {
                          if (month < 11) {
-                             setMonth(month + 1)
+                             changeMonth(month + 1)
                          }
                      }}
                 >{'>'}</div>
             </div>
 
             <div className={styles.yearPicker}>
-                <input type="text" maxLength={4} defaultValue={new Date().getFullYear()}/>
+                <input type="text"
+                       maxLength={4}
+                       value={year}
+                       onChange={(event) => {
+                           handleChange(event.target.value)
+                       }}
+                />
             </div>
         </div>
     )
 }
+
 export const DatePickerCalendar: React.FC<DatePickerCalendarProps> = ({
-    isOpened, date, onDatePickerChange, initialDate, dateFrom, dateTo
+    isOpened,
+
+    date,
+    onDatePickerChange,
+
+    initialDate,
+    dateFrom,
+    dateTo,
+
+    sizes
 }) => {
-    const [dateState, setDateState] = useState<Date>();
+    const [dateState, setDateState] = useState<Date>(initialDate ? initialDate : new Date());
+
+    useEffect(() => {
+        setDateState(date)
+    }, [date])
 
     function changeDate (date: Date) {
         setDateState(date);
@@ -190,8 +370,8 @@ export const DatePickerCalendar: React.FC<DatePickerCalendarProps> = ({
             styles.DatePicker,
             {[styles.opened]: isOpened}
         )}>
-            <MenuBar date={date} changeDate={changeDate}/>
-            <Calendar date={date} changeDate={changeDate}/>
+            <MenuBar date={dateState} changeDate={changeDate}/>
+            <Calendar date={dateState} changeDate={changeDate}/>
         </div>
     )
 }

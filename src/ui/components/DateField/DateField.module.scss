@@ -1,35 +1,54 @@
+// colors
+$dark: #23272A;
+$lessDark: #2C2F33;
+$mediumDark: #393d42;
+$disabledDark: #6f7680;
+
+$violet: #945dd7;
+$purple: #ea77fd;
+$pastelPurple: #f5c9fd;
+$white: #ffffff;
+
+//sizes
+$dateFieldWidth: 500px;
+$dateFieldHeight: 60px;
+$inputFontSize: $dateFieldHeight/2; //30px
+$inputPaddingLeft: $dateFieldHeight/3; //50% from width
+$iconSize: ($dateFieldHeight/3)*2; //40px
+
 .DateField {
   position: relative;
-  width: 440px;
+  width: $dateFieldWidth;
+  height: $dateFieldHeight;
 
   .Input {
     box-sizing: border-box;
-    border: #c4c4c4 2px solid;
+    border: $white 2px solid;
     border-radius: 3px;
 
     width: 100%;
-    height: 60px;
-    padding-left: 20px;
+    height: inherit;
+    //padding-left: $inputPaddingLeft;
+    padding-left: 5%;
 
-    font-size: 2rem;
-    color: white;
+    font-size: $inputFontSize;
+    color: $white;
     outline: none;
 
     &:focus {
-      box-shadow: 0 0 10px 1px #f5c9fd;
-      border-color: #ea77fd;
+      box-shadow: 0 0 10px 1px $pastelPurple;
+      border-color: $purple;
       transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
     }
   }
 
   .icon {
-    width: 40px;
-    height: 40px;
+    height: 67%;
 
     position: absolute;
     top: 50%;
-    right: 5px;
+    right: $iconSize/8;
     transform: translateY(-50%);
     filter: invert(1);
 
