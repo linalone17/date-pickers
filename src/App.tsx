@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {DateField} from "./ui/components/DateField";
 import styles from './App.module.scss';
 
+
 export default function App () {
     const [width, setWidth] = useState<string>('400');
     const [height, setHeight] = useState<string>('60');
@@ -18,9 +19,11 @@ export default function App () {
 
         setHeight(event.currentTarget.value)
     }
+
     function handleVisibilityChange(event: React.ChangeEvent<HTMLInputElement>) {
         setIsAlwaysOpened(event.target.checked);
     }
+
     return (
         <div className={styles.App}>
             <h1>Wheels</h1>

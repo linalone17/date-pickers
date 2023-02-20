@@ -6,7 +6,9 @@ import calendar from '../../assets/img/calendar.svg';
 import {DatePickerWheels} from "./DatePickerWheels";
 import {DatePickerCalendar} from "./DatePickerCalendar";
 import {useOutsideClick} from "../../../shared/hooks";
-import {getDateFromString, getStringFromDate} from "../../utils";
+import {copyDate, getDateFromString, getStringFromDate} from "../../utils";
+
+
 interface Sizes {
     height: number,
     width: number
@@ -119,11 +121,23 @@ export const DateField: React.FC<DateFieldProps> = ({
     function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
         const value = normalizeRawInputValue(event.target.value, rawInputValue);
         if (typeof value !== 'undefined') {
-            setRawInputValue(value);
             const date = getDateFromString(value);
-            if (date) {
-                console.log('set datepicker props')
+            if (!date) {
+                setRawInputValue(value);
+                return;
+            }
+
+            if (dateFrom && date < dateFrom) {
+                setDatePickerProps(copyDate(dateFrom));
+                setRawInputValue(getStringFromDate(dateFrom));
+                return;
+            }
+            if (dateTo && date > dateTo) {
+                setDatePickerProps(copyDate(dateTo));
+                setRawInputValue(getStringFromDate(dateTo))
+            } else {
                 setDatePickerProps(date);
+                setRawInputValue(value);
             }
         }
     }

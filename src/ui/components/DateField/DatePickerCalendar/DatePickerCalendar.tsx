@@ -7,28 +7,6 @@ import {monthNames, weekDayNamesFromMonday as weekDayNames} from "../../../const
 import cn from 'classnames';
 import styles from './DatePickerCalendar.module.scss'
 
-// const debounce = <T extends Function>(func: T, wait: number): T => {
-//     let isAllowed = true;
-//     let timeout: string | number | NodeJS.Timeout | undefined;
-//
-//     const returnFunc = (...args: any) => {
-//         if (isAllowed) {
-//             isAllowed = false;
-//             func(...args)
-//             timeout = setTimeout(() => {
-//                 isAllowed = true;
-//             }, wait)
-//         } else {
-//             clearTimeout(timeout);
-//             timeout = setTimeout(() => {
-//                 isAllowed = true;
-//             }, wait)
-//         }
-//     }
-//     // @ts-ignore
-//     return returnFunc as T;
-// }
-
 
 interface DatePickerCalendarProps {
     isOpened: boolean;
@@ -114,7 +92,6 @@ const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
 
     const [month, setMonth] = useState<number>(date.getMonth());
     const [year, setYear] = useState<number>(date.getFullYear());
-    console.log(year);
 
     const getWeeksAndMonthStartsMemo = useCallback(getWeeksAndMonthStarts, [year]);
 
@@ -152,7 +129,6 @@ const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
     useEffect(() => {
         if (!calendarRef || !calendarRef.current) return;
         calendarRef.current.scrollTo({top: 600});
-        console.log('initial scroll')
     },[calendarRef]);
 
     // intersection observer init
@@ -169,7 +145,6 @@ const Calendar: React.FC<CalendarProps> = ({date, changeDate}) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     observer.unobserve(entry.target);
-                    console.log('fired');
                     // calendarRef.current!.scrollTo({top: 0, behavior: 'smooth'});
                     setTimeout(() => {
                         setYear(prev => prev - 1)

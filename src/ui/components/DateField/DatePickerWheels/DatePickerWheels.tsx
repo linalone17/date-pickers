@@ -43,13 +43,10 @@ interface MonthWheelProps extends WheelProps {
 }
 
 //all the sizes are in strong dependency with fontSize
-// const defaultFontSize = 25; //px
-// const wheelItemSize = 1.55*defaultFontSize; //px
 
 // YearWheel logic
 
 function createYearValuesArray(year: number, yearFrom?:number, yearTo?:number): Array<number> {
-    console.log(year, yearFrom, yearTo)
     let intervalStart = year - 40;
     if (yearFrom && intervalStart < yearFrom) {
         intervalStart = yearFrom;
@@ -120,6 +117,31 @@ const YearWheel: React.FC<WheelProps> = ({
 
     function changeDateYear(year: number) {
         const newDate = new Date(copyDate(date).setFullYear(year));
+
+        if (dateFrom && newDate < dateFrom) {
+            newDate.setFullYear(dateFrom.getFullYear())
+        }
+
+        if (dateFrom && newDate < dateFrom) {
+            newDate.setMonth(dateFrom.getMonth())
+        }
+
+        if (dateFrom && newDate < dateFrom) {
+            newDate.setDate(dateFrom.getDate())
+        }
+
+        if (dateTo && newDate > dateTo) {
+            newDate.setFullYear(dateTo.getFullYear())
+        }
+
+        if (dateTo && newDate > dateTo) {
+            newDate.setMonth(dateTo.getMonth())
+        }
+
+        if (dateTo && newDate > dateTo) {
+            newDate.setDate(dateTo.getDate())
+        }
+
         changeDate(newDate)
     }
 
@@ -222,7 +244,7 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
 
     useEffect(() => {
         if (flow === 'down') {
-            scrollTo(month);
+            scrollTo(monthValuesArray.indexOf(month));
         }
     }, [wheelItemSize, date])
 
@@ -250,9 +272,22 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     }
 
     function changeDateMonth (month: number) {
-        changeDate(
-            new Date(copyDate(date).setMonth(month))
-        )
+        const newDate = new Date(copyDate(date).setMonth(month));
+        if (dateFrom && newDate < dateFrom) {
+            newDate.setMonth(dateFrom.getMonth())
+        }
+        if (dateFrom && newDate < dateFrom) {
+            newDate.setDate(dateFrom.getDate())
+        }
+
+        if (dateTo && newDate > dateTo) {
+            newDate.setMonth(dateTo.getMonth())
+        }
+        if (dateTo && newDate > dateTo) {
+            newDate.setDate(dateTo.getDate())
+        }
+
+        changeDate(newDate)
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, month: number) {
@@ -367,18 +402,14 @@ const DayWheel: React.FC<WheelProps> =({
     // initialize date
     useEffect(() => {
         if (flow === 'down') {
-            scrollTo(date.getDate() - 1);
-            console.log('scrolled to ', date.getDate() - 1)
+            scrollTo(dayValuesArray.indexOf(day));
         }
     }, [wheelItemSize, date])
 
-    useEffect(() => {
-    })
 
     function scrollTo(index: number) {
         if (wheelRef.current) {
             isScrollAllowedRef.current = false;
-            console.log('should scroll ', (index))
             wheelRef.current.scrollTop = (index)*wheelItemSize!;
 
             isScrollAllowedRef.current = true;
@@ -400,9 +431,16 @@ const DayWheel: React.FC<WheelProps> =({
 
 
     function changeDateDay(day: number) {
-        changeDate(
-            new Date(copyDate(date).setDate(day))
-        )
+        const newDate = new Date(copyDate(date).setDate(day));
+
+        if (dateFrom && newDate < dateFrom) {
+            newDate.setDate(dateFrom.getDate())
+        }
+
+        if (dateTo && newDate > dateTo) {
+            newDate.setDate(dateTo.getDate())
+        }
+        changeDate(newDate)
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
