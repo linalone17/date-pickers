@@ -7,16 +7,21 @@ import {DatePickerWheels} from "./DatePickerWheels";
 import {DatePickerCalendar} from "./DatePickerCalendar";
 import {useOutsideClick} from "../../../shared/hooks";
 import {getDateFromString, getStringFromDate} from "../../utils";
-
+interface Sizes {
+    height: number,
+    width: number
+}
 interface DateFieldProps {
     variant: 'wheels' | 'calendar';
     initialDate?: Date;
     dateFrom?: Date;
     dateTo?: Date;
+
+    sizes?: Sizes;
 }
 
-const sizes = {
-    height: 80,
+const defaultSizes = {
+    height: 60,
     width: 400
 }
 
@@ -76,11 +81,14 @@ export const DateField: React.FC<DateFieldProps> = ({
     initialDate,
     dateFrom,
     dateTo,
-    variant
+    variant,
+    sizes
 }) => {
     const [rawInputValue, setRawInputValue] = useState<string>(
         initialDate ? getStringFromDate(initialDate) : ''
     );
+
+    sizes = sizes ?? defaultSizes;
 
     // used only to change DatePicker props, may differ from datepicker dateState
     const [datePickerProps, setDatePickerProps] = useState<Date>(initialDate ? initialDate : new Date());
@@ -130,6 +138,11 @@ export const DateField: React.FC<DateFieldProps> = ({
         <div
             className={styles.DateField}
             ref={dateFieldRef}
+            style={{
+                height: `${sizes.height}px`,
+                width: `${sizes.width}px`,
+                fontSize: `${sizes.height/2}px`
+            }}
         >
             <input className={styles.Input}
                    type="text"

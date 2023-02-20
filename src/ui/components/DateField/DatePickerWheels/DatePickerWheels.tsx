@@ -36,11 +36,17 @@ interface WheelProps {
     changeDate: (date: Date) => void;
     dateFrom?: Date;
     dateTo?: Date;
+
+    wheelItemSize: number;
+}
+
+interface MonthWheelProps extends WheelProps {
+    isFullName: boolean;
 }
 
 //all the sizes are in strong dependency with fontSize
-const fontSize = 25; //px
-const wheelItemSize = 1.55*fontSize; //px
+// const defaultFontSize = 25; //px
+// const wheelItemSize = 1.55*defaultFontSize; //px
 
 // YearWheel logic
 
@@ -48,12 +54,12 @@ const wheelItemSize = 1.55*fontSize; //px
 //       don't work with date as prop well, gotta change to year.
 function createYearValuesArray(year: number, yearFrom?:number, yearTo?:number): Array<number> {
     console.log(year, yearFrom, yearTo)
-    let intervalStart = year - 25;
+    let intervalStart = year - 40;
     if (yearFrom && intervalStart < yearFrom) {
         intervalStart = yearFrom;
     }
 
-    let intervalEnd = year + 25;
+    let intervalEnd = year + 40;
     if (yearTo && intervalEnd > yearTo) {
         intervalEnd = yearTo;
     }
@@ -67,7 +73,10 @@ const YearWheel: React.FC<WheelProps> = ({
     flow,
 
     dateFrom,
-    dateTo}
+    dateTo,
+
+    wheelItemSize
+}
 ) => {
     const [yearValuesArray, setYearValuesArray] = useState<Array<number>>(() =>
         {return createYearValuesArray(
@@ -114,9 +123,8 @@ const YearWheel: React.FC<WheelProps> = ({
     }
 
     function changeDateYear(year: number) {
-        changeDate(
-            new Date(copyDate(date).setFullYear(year))
-        )
+        const newDate = new Date(copyDate(date).setFullYear(year));
+        changeDate(newDate)
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, year: number) {
@@ -190,18 +198,22 @@ function createMonthValuesArray(date: Date, dateFrom?: Date, dateTo?: Date): Arr
 }
 // const monthValuesArray: Array<number> = createArrayFromInterval(0, 11);
 
-const MonthWheel: React.FC<WheelProps> = ({
+const MonthWheel: React.FC<MonthWheelProps> = ({
     date,
-    flow,
     changeDate,
+
+    flow,
+
     dateFrom,
-    dateTo
+    dateTo,
+
+    wheelItemSize,
+    isFullName
 }) => {
     const wheelRef = useRef<HTMLDivElement>(null);
 
     const year = date.getFullYear();
     const month = date.getMonth();
-    const fullMonthName = true;
 
     const createMonthValuesArrayMemo = useCallback(createMonthValuesArray, [year]);
     const monthValuesArray = createMonthValuesArrayMemo(date, dateFrom, dateTo);
@@ -277,7 +289,7 @@ const MonthWheel: React.FC<WheelProps> = ({
     return (
         <div className={cn(
             styles.wheelContainer,
-            {[styles.fullMonthName]: fullMonthName}
+            {[styles.fullMonthName]: isFullName}
         )}>
             <div
                 className={styles.wheel}
@@ -297,7 +309,7 @@ const MonthWheel: React.FC<WheelProps> = ({
                         onClick={(e) => {
                             handleClick(e, value);
                         }}
-                    >{fullMonthName ? months[value].name : months[value].short}</div>
+                    >{isFullName ? months[value].name : months[value].short}</div>
                 })}
 
                 <div className={styles.void}></div>
@@ -337,7 +349,9 @@ const DayWheel: React.FC<WheelProps> =({
     flow,
 
     dateFrom,
-    dateTo
+    dateTo,
+
+    wheelItemSize
 }) => {
     const day = date.getDate();
     const month = date.getMonth();
@@ -468,7 +482,10 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         flow: 'down'
     });
 
-    useEffect(() => {
+    const fontSize = sizes.height*0.417;
+    const wheelItemSize = fontSize*1.55;
+
+        useEffect(() => {
         setDateState({
             value: date,
             flow: 'down'
@@ -496,6 +513,8 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                       changeDate={changeDate}
                       dateFrom={dateFrom}
                       dateTo={dateTo}
+
+                      wheelItemSize={wheelItemSize}
             />
             <MonthWheel date={dateState.value}
                         flow={dateState.flow}
@@ -503,6 +522,9 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                         changeDate={changeDate}
                         dateFrom={dateFrom}
                         dateTo={dateTo}
+
+                        wheelItemSize={wheelItemSize}
+                        isFullName={(sizes.width / sizes.height) > 5}
             />
             <YearWheel date={dateState.value}
                        flow={dateState.flow}
@@ -510,6 +532,8 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                        changeDate={changeDate}
                        dateFrom={dateFrom}
                        dateTo={dateTo}
+
+                       wheelItemSize={wheelItemSize}
             />
         </div>
     )

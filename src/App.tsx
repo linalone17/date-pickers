@@ -6,13 +6,27 @@ export default function App () {
 
     return (
         <div className={styles.App}>
-            <h2>calendar</h2>
-            <DateField initialDate={new Date()} variant={'calendar'}/>
             <h2>wheels</h2>
             <DateField initialDate={new Date()}
-                       // dateFrom={new Date(2022, 4, 14)}
-                       // dateTo={new Date(2024, 5, 6)}
+                       dateFrom={new Date(2022, 4, 14)}
+                       dateTo={new Date(2024, 5, 6)}
                        variant={'wheels'}/>
+            <DateField initialDate={new Date()}
+                       variant={'wheels'}
+                       sizes={{
+                           height: 60,
+                           width: 300
+                       }}
+            />
+            <DateField initialDate={new Date()}
+                       variant={'wheels'}
+                       sizes={{
+                           height: 40,
+                           width: 200
+                       }}
+            />
+            <h2>calendar</h2>
+            <DateField initialDate={new Date()} variant={'calendar'}/>
         </div>
     )
 }

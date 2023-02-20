@@ -12,14 +12,15 @@ $white: #ffffff;
 //sizes
 $dateFieldWidth: 400px;
 $dateFieldHeight: 60px;
-$inputFontSize: $dateFieldHeight/2; //30px
-$inputPaddingLeft: $dateFieldHeight/3; //50% from width
-$iconSize: ($dateFieldHeight/3)*2; //40px
+$inputFontSize: $dateFieldHeight/2; // $dateFieldHeight/2
+$inputPaddingLeft: 5%; // $dateFieldWidth/8
+$iconSize: 67%; //($dateFieldHeight/3)*2
 
 .DateField {
   position: relative;
-  width: $dateFieldWidth;
-  height: $dateFieldHeight;
+  //width: $dateFieldWidth;
+  //height: $dateFieldHeight;
+  //font-size: $inputFontSize;
 
   .Input {
     box-sizing: border-box;
@@ -28,10 +29,9 @@ $iconSize: ($dateFieldHeight/3)*2; //40px
 
     width: 100%;
     height: inherit;
-    //padding-left: $inputPaddingLeft;
-    padding-left: 5%;
+    padding-left: $inputPaddingLeft;
 
-    font-size: $inputFontSize;
+    font-size: inherit;
     color: $white;
     outline: none;
 
@@ -44,11 +44,11 @@ $iconSize: ($dateFieldHeight/3)*2; //40px
   }
 
   .icon {
-    height: 67%;
+    height: $iconSize;
 
     position: absolute;
     top: 50%;
-    right: $iconSize/8;
+    right: 1.5%;
     transform: translateY(-50%);
     filter: invert(1);
 

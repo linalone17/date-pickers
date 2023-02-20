@@ -7,13 +7,16 @@ body {
   input {
     background-color: #23272A;
   }
+
+  height: 1000px;
 }
 .App {
   display: flex;
   flex-direction: column;
   gap: 20px;
   position: absolute;
-  top: 30%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%);
+
+  margin-top: 50px;
 }
