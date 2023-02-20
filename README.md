@@ -6,7 +6,7 @@ have the **same** functions
 #### Preview
 ![](https://github.com/linalone17/date-pickers/blob/main/other/preview.gif)
 
-### Calendar DatePicker(WIP):
+### Calendar DatePicker(Work In Progress):
 I don't like calendar datepickers at all <br>
 there's why I developed the thing above<br>
 but there's ***good one on Windows***,<br>
