@@ -7,10 +7,12 @@ export default function App () {
     return (
         <div className={styles.App}>
             <h2>wheels</h2>
+            <h3>standard</h3>
             <DateField initialDate={new Date()}
                        dateFrom={new Date(2022, 4, 14)}
                        dateTo={new Date(2024, 5, 6)}
                        variant={'wheels'}/>
+            <h3>less width</h3>
             <DateField initialDate={new Date()}
                        variant={'wheels'}
                        sizes={{
@@ -18,6 +20,7 @@ export default function App () {
                            width: 300
                        }}
             />
+            <h3>smaller</h3>
             <DateField initialDate={new Date()}
                        variant={'wheels'}
                        sizes={{

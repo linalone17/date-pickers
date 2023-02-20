@@ -1,4 +1,5 @@
 @use 'src/shared/styles/functions' as functions;
+
 //colors
 $dark: #23272A;
 $lessDark: #2C2F33;
@@ -14,14 +15,14 @@ $white: #ffffff;
 
 //sizes
 $fontSize: 25px;
-$fadeHeight: $fontSize; //1em
-$wheelPadding: ($fontSize/5)*2;//0.4em
-$itemPadding: $fontSize/5; //0.2em
-$itemSize: $fontSize*1.15+ $itemPadding*2; //1.15em + 0.4em = 1.55em
-$datePickerHeight: $itemSize*5 +$wheelPadding*2; // 1.55em*5 + 0.4em*2 = 7.75em + 0.8em = 8.55em
-$wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
+$fadeHeight: 1em; // $fontSize
+$wheelPadding: 0.4em;// ($fontSize/5)*2
+$itemPadding: 0.2em; // $fontSize/5
+$itemSize: 1.55em; // $fontSize*1.15+ $itemPadding*2
+$datePickerHeight: 8.55em; // $itemSize*5 +$wheelPadding*2
+$wheelHeight: 7.75em; // $itemSize*5
 
-// font-size change STRICTLY CONTROLLED!!!
+// font-size change is STRICTLY CONTROLLED!!!
 // almost all elements' sizes DEPEND ON IT
 // DON'T FORGET ABOUT
 
@@ -33,11 +34,10 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
   pointer-events: none;
   user-select: none;
   line-height: 1.15;
-
+  //line-height: 1;
   &.opened {
     opacity: 1;
-    //height: $datePickerHeight;
-    height: 8.55em;
+    height: $datePickerHeight; //8.55em
     pointer-events: auto;
     transition:
             height 0.35s ease-in-out,
@@ -49,8 +49,7 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
   background-color: $lessDark;
   grid-template-columns: 4fr 5fr 4fr;
   overflow: hidden;
-  //padding-top: $wheelPadding;
-  padding: 0.4em 1em 0;
+  padding: $wheelPadding 1em 0;
   box-sizing: border-box;
   border-bottom: 2px solid $purple;
   border-bottom-left-radius: 20px;
@@ -61,6 +60,7 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
     position: relative;
     margin: 0 auto;
     width: 2.9em;
+
     &.fullMonthName {
       width: 5.2em;
     }
@@ -69,8 +69,7 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
       flex-direction: column;
       //margin-left: 30px;
       //outline: 5px solid red;
-      height: 7.75em;
-      //padding-bottom: $wheelPadding;
+      height:$wheelHeight; //7.75em
       margin-bottom: 0.4em;
 
       overflow-y: scroll;
@@ -87,8 +86,7 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
 
       &:before {
         content: '';
-        //height: $fadeHeight;
-        height: 1em;
+        height: $fadeHeight; //1em
         width: 100%;
         position: absolute;
         top: 0;
@@ -103,8 +101,7 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
 
       &:after {
         content: '';
-        //height: $fadeHeight;
-        height: 1em;
+        height: $fadeHeight; // 1em
         width: 100%;
         position: absolute;
         bottom: 0;
@@ -117,8 +114,7 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
         pointer-events: none;
       }
       .void {
-        //min-height: $itemSize;
-        min-height: 1.55em;
+        min-height: $itemSize; //1.55em
         width: 1px;
         scroll-snap-align: start;
         scroll-snap-stop: normal;
@@ -154,13 +150,12 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
   &:before {
     content: '';
     width: 100%;
-    //height: $itemSize;
-    height: 1.55em;
+    height: $itemSize;
     background: none;
     border-radius: 10px;
     box-shadow: 0 0 20px 1px rgba(60, 66, 70, 0.8);
     position: absolute;
-    //top: $itemSize*2 + 10px;
+    //top: $itemSize*2 + 0.4em
     top: 3.5em;
     z-index: 0;
 

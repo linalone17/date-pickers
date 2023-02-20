@@ -36,8 +36,6 @@ interface WheelProps {
     changeDate: (date: Date) => void;
     dateFrom?: Date;
     dateTo?: Date;
-
-    wheelItemSize: number;
 }
 
 interface MonthWheelProps extends WheelProps {
@@ -50,8 +48,6 @@ interface MonthWheelProps extends WheelProps {
 
 // YearWheel logic
 
-// TODO: react.memo, but it doesn't seem to be slow YET;
-//       don't work with date as prop well, gotta change to year.
 function createYearValuesArray(year: number, yearFrom?:number, yearTo?:number): Array<number> {
     console.log(year, yearFrom, yearTo)
     let intervalStart = year - 40;
@@ -73,9 +69,7 @@ const YearWheel: React.FC<WheelProps> = ({
     flow,
 
     dateFrom,
-    dateTo,
-
-    wheelItemSize
+    dateTo
 }
 ) => {
     const [yearValuesArray, setYearValuesArray] = useState<Array<number>>(() =>
@@ -88,13 +82,15 @@ const YearWheel: React.FC<WheelProps> = ({
 
     const year = date.getFullYear();
     const wheelRef = useRef<HTMLDivElement>(null);
+    const wheelItemSize = wheelRef.current ? wheelRef.current.scrollHeight / wheelRef.current.childElementCount : null;
+
     const isScrollAllowedRef = useRef<boolean>(true);
 
     useEffect(() => {
         if (flow === 'down') {
             scrollTo(yearValuesArray.indexOf(year));
         }
-    }, [wheelRef, year])
+    }, [wheelItemSize, year])
 
 
     function scrollTo(index: number) {
@@ -102,7 +98,7 @@ const YearWheel: React.FC<WheelProps> = ({
             isScrollAllowedRef.current = false;
 
             wheelRef.current.scrollTo({
-                top: (index)*wheelItemSize
+                top: (index)*wheelItemSize!
             });
 
             isScrollAllowedRef.current = true;
@@ -114,7 +110,7 @@ const YearWheel: React.FC<WheelProps> = ({
             isScrollAllowedRef.current = false;
 
             wheelRef.current.scrollTo({
-                top: (index)*wheelItemSize,
+                top: (index)*wheelItemSize!,
                 behavior: 'smooth'
             })
 
@@ -133,31 +129,36 @@ const YearWheel: React.FC<WheelProps> = ({
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
         if (!isScrollAllowedRef.current) return;
-        if (!event.currentTarget) {
-            return
-        }
+        if (!wheelRef.current) return;
+
         const scrollTop = event.currentTarget.scrollTop;
-        const scrollOffset = (scrollTop) % wheelItemSize;
+        const scrollOffset = (scrollTop) % wheelItemSize!;
         let currentIndexByScroll;
-        if (scrollOffset < wheelItemSize/2) {
-            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize);
+        if (scrollOffset < wheelItemSize!/2) {
+            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize!);
         } else {
-            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize) + 1;
+            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize!) + 1;
         }
 
         const currentYearByScroll = currentIndexByScroll + yearValuesArray[0];
 
         if (
             currentYearByScroll !== year &&
+            currentYearByScroll >= yearValuesArray[0] &&
             currentYearByScroll <= yearValuesArray[yearValuesArray.length - 1]
         ) {
             changeCurrent(currentYearByScroll);
+        }
+        if (statRef.current) {
+            statRef.current!.innerHTML = `ST:${scrollTop} IS: ${wheelItemSize}`;
         }
     }
 
     function changeCurrent (year: number) {
         changeDateYear(year);
     }
+
+    const statRef = useRef<HTMLDivElement>(null);
 
     return (
         <div className={styles.wheelContainer}>
@@ -206,11 +207,10 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
 
     dateFrom,
     dateTo,
-
-    wheelItemSize,
     isFullName
 }) => {
     const wheelRef = useRef<HTMLDivElement>(null);
+    const wheelItemSize = wheelRef.current ? wheelRef.current.scrollHeight / wheelRef.current.childElementCount : null;
 
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -224,13 +224,13 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
         if (flow === 'down') {
             scrollTo(month);
         }
-    }, [wheelRef.current, month])
+    }, [wheelItemSize, date])
 
     function scrollTo(index: number) {
         if (wheelRef.current) {
             isScrollAllowedRef.current = false;
 
-            wheelRef.current.scrollTop = (index)*wheelItemSize;
+            wheelRef.current.scrollTop = (index)*wheelItemSize!;
 
             isScrollAllowedRef.current = true;
         }
@@ -241,7 +241,7 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
             isScrollAllowedRef.current = false;
 
             wheelRef.current.scrollTo({
-                top: (index)*wheelItemSize,
+                top: (index)*wheelItemSize!,
                 behavior: 'smooth'
             })
 
@@ -261,20 +261,22 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
         if (!isScrollAllowedRef.current) return;
+        if (!wheelRef.current) return;
 
         const scrollTop = event.currentTarget.scrollTop;
-        const scrollOffset = (scrollTop) % wheelItemSize;
+        const scrollOffset = (scrollTop) % wheelItemSize!;
         let currentIndexByScroll;
-        if (scrollOffset < wheelItemSize/2) {
-            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize);
+        if (scrollOffset < wheelItemSize!/2) {
+            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize!);
         } else {
-            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize) + 1;
+            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize!) + 1;
         }
 
         const currentMonthByScroll = currentIndexByScroll + monthValuesArray[0];
         //length check prevents scroll bug
         if (
             currentMonthByScroll !== month &&
+            currentMonthByScroll >= monthValuesArray[0] &&
             currentMonthByScroll <= monthValuesArray[monthValuesArray.length - 1]
         ) {
             changeCurrent(currentMonthByScroll);
@@ -285,7 +287,6 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
         changeDateMonth(month);
     }
 
-    // const changeCurrentThrottled = useThrottle<typeof changeCurrent>(changeCurrent, 40)
     return (
         <div className={cn(
             styles.wheelContainer,
@@ -349,9 +350,7 @@ const DayWheel: React.FC<WheelProps> =({
     flow,
 
     dateFrom,
-    dateTo,
-
-    wheelItemSize
+    dateTo
 }) => {
     const day = date.getDate();
     const month = date.getMonth();
@@ -361,22 +360,26 @@ const DayWheel: React.FC<WheelProps> =({
     const dayValuesArray = createDayValuesArrayMemo(date, dateFrom, dateTo);
 
     const wheelRef = useRef<HTMLDivElement>(null);
+    const wheelItemSize = wheelRef.current ? wheelRef.current.scrollHeight / wheelRef.current.childElementCount : null;
 
     const isScrollAllowedRef = useRef<boolean>(true);
 
     // initialize date
     useEffect(() => {
         if (flow === 'down') {
-            scrollTo(day - 1);
+            scrollTo(date.getDate() - 1);
+            console.log('scrolled to ', date.getDate() - 1)
         }
-    }, [wheelRef, day])
+    }, [wheelItemSize, date])
 
+    useEffect(() => {
+    })
 
     function scrollTo(index: number) {
         if (wheelRef.current) {
             isScrollAllowedRef.current = false;
-
-            wheelRef.current.scrollTop = (index)*wheelItemSize;
+            console.log('should scroll ', (index))
+            wheelRef.current.scrollTop = (index)*wheelItemSize!;
 
             isScrollAllowedRef.current = true;
         }
@@ -387,7 +390,7 @@ const DayWheel: React.FC<WheelProps> =({
             isScrollAllowedRef.current = false;
 
             wheelRef.current.scrollTo({
-                top: (index)*wheelItemSize,
+                top: (index)*wheelItemSize!,
                 behavior: 'smooth'
             })
 
@@ -404,20 +407,23 @@ const DayWheel: React.FC<WheelProps> =({
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
         if (!isScrollAllowedRef.current) return;
+        if (!wheelRef.current) return;
+
         const scrollTop = event.currentTarget.scrollTop;
-        const scrollOffset = (scrollTop) % wheelItemSize;
+        const scrollOffset = (scrollTop) % wheelItemSize!;
 
         let currentIndexByScroll;
-        if (scrollOffset < wheelItemSize/2) {
-            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize);
+        if (scrollOffset < wheelItemSize!/2) {
+            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize!);
         } else {
-            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize) + 1;
+            currentIndexByScroll = Math.floor(scrollTop/wheelItemSize!) + 1;
         }
 
         const currentDayByScroll = currentIndexByScroll + dayValuesArray[0];
 
         if (
             currentDayByScroll !== day &&
+            currentDayByScroll >= dayValuesArray[0] &&
             currentDayByScroll <= dayValuesArray[dayValuesArray.length - 1]
         ) {
             changeDateDay(currentDayByScroll);
@@ -427,6 +433,7 @@ const DayWheel: React.FC<WheelProps> =({
     function handleClick(event: React.MouseEvent<HTMLDivElement>, day: number) {
         smoothScrollTo(dayValuesArray.indexOf(day));
     }
+
 
     return (
         <div className={styles.wheelContainer}>
@@ -482,8 +489,7 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         flow: 'down'
     });
 
-    const fontSize = sizes.height*0.417;
-    const wheelItemSize = fontSize*1.55;
+    const fontSize = sizes.height*5/12; // all the sizes depend on fontSize
 
         useEffect(() => {
         setDateState({
@@ -513,8 +519,6 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                       changeDate={changeDate}
                       dateFrom={dateFrom}
                       dateTo={dateTo}
-
-                      wheelItemSize={wheelItemSize}
             />
             <MonthWheel date={dateState.value}
                         flow={dateState.flow}
@@ -523,7 +527,6 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                         dateFrom={dateFrom}
                         dateTo={dateTo}
 
-                        wheelItemSize={wheelItemSize}
                         isFullName={(sizes.width / sizes.height) > 5}
             />
             <YearWheel date={dateState.value}
@@ -533,7 +536,6 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                        dateFrom={dateFrom}
                        dateTo={dateTo}
 
-                       wheelItemSize={wheelItemSize}
             />
         </div>
     )
