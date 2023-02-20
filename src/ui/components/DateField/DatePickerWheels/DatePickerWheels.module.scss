@@ -1,3 +1,4 @@
+@use 'src/shared/styles/functions' as functions;
 //colors
 $dark: #23272A;
 $lessDark: #2C2F33;
@@ -92,7 +93,11 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
         position: absolute;
         top: 0;
         left: 0;
-        background: linear-gradient(180deg, rgba(44,47,51,1) 0%, rgba(44,47,51,0.6) 41%, rgba(44,47,51,0) 100%);
+        background: linear-gradient(180deg,
+                functions.setAlpha($lessDark, 1) 0%,
+                functions.setAlpha($lessDark, 0.6) 41%,
+                functions.setAlpha($lessDark, 0) 100%,
+        );
         pointer-events: none;
       }
 
@@ -104,7 +109,11 @@ $wheelHeight: $itemSize*5; //1.55em*5em = 7.75em;
         position: absolute;
         bottom: 0;
         left: 0;
-        background: linear-gradient(0, rgba(44,47,51,1) 0%, rgba(44,47,51,0.6) 41%, rgba(44,47,51,0) 100%);
+        background: linear-gradient(0,
+                functions.setAlpha($lessDark, 1) 0%,
+                functions.setAlpha($lessDark, 0.6) 41%,
+                functions.setAlpha($lessDark, 0) 100%,
+        );
         pointer-events: none;
       }
       .void {
