@@ -31,7 +31,7 @@ body {
   transform: translate(-50%);
 
   margin-top: 50px;
-  .sizes {
+  .options {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -54,13 +54,24 @@ body {
         color: $white;
         height: 30px;
         width: 60px;
-
+        text-align: center;
         &:focus {
           //box-shadow: 0 0 10px 1px $pastelPurple;
           border-color: $purple;
-          transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+          transition: border-color 0.15s ease-in-out;
 
+          &~legend {
+            color: $purple;
+            transition: color 0.15s ease-in-out;
+          }
         }
+      }
+    }
+    .visibility {
+      display: flex;
+      gap: 5px;
+      input {
+        background-color: $pastelPurple;
       }
     }
   }

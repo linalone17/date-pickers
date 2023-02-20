@@ -18,6 +18,7 @@ interface DateFieldProps {
     dateTo?: Date;
 
     sizes?: Sizes;
+    alwaysOpened?: boolean;
 }
 
 const defaultSizes = {
@@ -82,7 +83,8 @@ export const DateField: React.FC<DateFieldProps> = ({
     dateFrom,
     dateTo,
     variant,
-    sizes
+    sizes,
+    alwaysOpened
 }) => {
     const [rawInputValue, setRawInputValue] = useState<string>(
         initialDate ? getStringFromDate(initialDate) : ''
@@ -157,7 +159,7 @@ export const DateField: React.FC<DateFieldProps> = ({
             <div className={styles.DatePicker}>
                 {variant === 'wheels' ?
                     <DatePickerWheels
-                        isOpened={isDatePickerOpened}
+                        isOpened={alwaysOpened ? alwaysOpened : isDatePickerOpened}
 
                         date={datePickerProps}
                         onDatePickerChange={handleDateChangeFromDatePicker}
@@ -169,7 +171,7 @@ export const DateField: React.FC<DateFieldProps> = ({
                     />
                     :
                     <DatePickerCalendar
-                        isOpened={isDatePickerOpened}
+                        isOpened={alwaysOpened ? alwaysOpened : isDatePickerOpened}
 
                         date={datePickerProps}
                         onDatePickerChange={handleDateChangeFromDatePicker}
