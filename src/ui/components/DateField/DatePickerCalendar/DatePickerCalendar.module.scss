@@ -133,7 +133,7 @@ $daySize: 40px;
       top: -1px; // -1px bug
       left: 0;
       display: flex;
-      display:none;
+      //display:none;
 
       z-index: 100;
       gap: $daysGap;
@@ -150,7 +150,7 @@ $daySize: 40px;
     }
     .body {
       height: $calendarHeight;
-      outline: 10px solid darkred;
+      //outline: 10px solid darkred;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -187,10 +187,10 @@ $daySize: 40px;
         display: flex;
         gap: $daysGap;
         scroll-snap-stop: normal;
-        //scroll-margin-top: 30px;
+        scroll-margin-top: 30px;
         &.scrollSnapTarget {
           scroll-snap-align: start;
-          background-color: red;
+          //background-color: red;
         }
         &.prevYearWeeksPreload {
           scroll-snap-align: unset;
