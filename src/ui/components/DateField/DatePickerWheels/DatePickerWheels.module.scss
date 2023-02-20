@@ -153,7 +153,8 @@ $wheelHeight: 7.75em; // $itemSize*5
     height: $itemSize;
     background: none;
     border-radius: 10px;
-    box-shadow: 0 0 20px 1px rgba(60, 66, 70, 0.8);
+    //box-shadow: 0 0 20px 1px rgba(60, 66, 70, 0.8);
+    box-shadow: 0 0 20px 1px functions.setAlpha($mediumDark, 0.8);
     position: absolute;
     //top: $itemSize*2 + 0.4em
     top: 3.5em;
