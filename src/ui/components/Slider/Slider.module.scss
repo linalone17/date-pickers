@@ -1,0 +1,54 @@
+$dark: #23272A;
+$lessDark: #2C2F33;
+$mediumDark: #393d42;
+$disabledDark: #6f7680;
+
+$violet: #945dd7;
+$purple: #ea77fd;
+$pastelPurple: #f5c9fd;
+$white: #ffffff;
+
+$offset: 200px;
+
+
+.Slider {
+  .SliderBody {
+    position: relative;
+    .body {
+      height: 20px;
+      width: 500px;
+      border-radius: 20px;
+      background-color: $white;
+      overflow: hidden;
+
+      .progress {
+        height: inherit;
+        width: inherit;
+        background-color: $violet;
+        margin-left: $offset - 500px;
+      }
+    }
+
+    .indicator {
+      box-sizing: border-box;
+      width: 30px;
+      height: 30px;
+      border: 2px solid $white;
+      border-radius: 50%;
+      background-color: $purple;
+
+      position: absolute;
+      top: 50%;
+      left: 0;
+
+      transform: translateX(-50%) translateY(-50%);
+
+      margin-left: $offset;
+      opacity: 0.7;
+    }
+  }
+
+  .SliderScale {
+
+  }
+}

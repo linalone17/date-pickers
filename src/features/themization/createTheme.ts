@@ -2,7 +2,6 @@ import {Theme} from "../typings/Theme";
 import {themeDark} from "../constants/themeDark";
 import {themeLight} from "../constants/themeLight";
 
-// really bad typization... so far
 // interface CreateThemeArgs<T extends ('dark' | 'light' | Theme)> {
 //     theme: T;
 //     options?: T extends Theme ? never : Partial<Theme>;

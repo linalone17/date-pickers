@@ -11,4 +11,6 @@ export interface Theme {
 
     fontPrimary: string;
     fontSecondary: string;
+
+    error: string;
 }

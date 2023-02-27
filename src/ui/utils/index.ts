@@ -1,4 +1,3 @@
-export {createArrayFromInterval} from '../../shared/utils/createArrayFromInterval';
 export {getMonthDaysAmount} from './getMonthDaysAmount';
 export {isLeapYear} from './isLeapYear';
 export {copyDate} from './copyDate';

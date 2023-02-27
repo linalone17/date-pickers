@@ -122,6 +122,8 @@ export const DateField: React.FC<DateFieldProps> = ({
         const value = normalizeRawInputValue(event.target.value, rawInputValue);
         if (typeof value !== 'undefined') {
             const date = getDateFromString(value);
+
+            //date value string is invalid
             if (!date) {
                 setRawInputValue(value);
                 return;
@@ -135,10 +137,11 @@ export const DateField: React.FC<DateFieldProps> = ({
             if (dateTo && date > dateTo) {
                 setDatePickerProps(copyDate(dateTo));
                 setRawInputValue(getStringFromDate(dateTo))
-            } else {
-                setDatePickerProps(date);
-                setRawInputValue(value);
+                return;
             }
+            console.log('date in interval: ', value, date)
+            setDatePickerProps(date);
+            setRawInputValue(value);
         }
     }
 

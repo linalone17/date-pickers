@@ -1,11 +1,18 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 
 import {
-    createArrayFromInterval,
     getMonthDaysAmount,
     copyDate,
-    getWeekDayName
+    getWeekDayName,
+    getStringFromDate
 } from '../../../utils';
+
+import {
+    createArrayFromInterval,
+    getArrayMiddleElement
+} from "../../../../shared/utils";
+
+import {Nullable} from "../../../../shared/typings/utils";
 
 import {months} from "../../../constants";
 
@@ -31,9 +38,9 @@ interface DatePickerProps {
 
 interface WheelProps {
     date: Date;
-    flow: 'up' | 'down';
+    withScroll: boolean;
 
-    changeDate: (date: Date) => void;
+    changeDate: (date: Date, withScroll?: boolean) => void;
     dateFrom?: Date;
     dateTo?: Date;
 }
@@ -42,20 +49,20 @@ interface MonthWheelProps extends WheelProps {
     isFullName: boolean;
 }
 
-//all the sizes are in strong dependency with fontSize
-
 // YearWheel logic
 
-function createYearValuesArray(year: number, yearFrom?:number, yearTo?:number): Array<number> {
-    let intervalStart = year - 40;
-    if (yearFrom && intervalStart < yearFrom) {
-        intervalStart = yearFrom;
+function createYearValuesArray(yearFrom: number, yearTo: number, yearFromThreshold?:number, yearToThreshold?:number): Array<number> {
+    let intervalStart = yearFrom;
+    if (yearFromThreshold && intervalStart < yearFromThreshold) {
+        intervalStart = yearFromThreshold;
     }
 
-    let intervalEnd = year + 40;
-    if (yearTo && intervalEnd > yearTo) {
-        intervalEnd = yearTo;
+    let intervalEnd = yearTo;
+    if (yearToThreshold && intervalEnd > yearToThreshold) {
+        intervalEnd = yearToThreshold;
     }
+    console.log(intervalStart, intervalEnd);
+
     return createArrayFromInterval(intervalStart, intervalEnd);
 }
 
@@ -63,32 +70,113 @@ const YearWheel: React.FC<WheelProps> = ({
     date,
     changeDate,
 
-    flow,
+    withScroll,
 
     dateFrom,
     dateTo
 }
 ) => {
-    const [yearValuesArray, setYearValuesArray] = useState<Array<number>>(() =>
-        {return createYearValuesArray(
-            date.getFullYear(),
-            dateFrom?.getFullYear(),
-            dateTo?.getFullYear()
-        )}
-    );
-
     const year = date.getFullYear();
+    const yearFrom = dateFrom?.getFullYear();
+    const yearTo = dateTo?.getFullYear();
+
+
+    const [yearValuesArray, setYearValuesArray] = useState<Array<number>>(() => (
+        createYearValuesArray(
+            year - 50,
+            year + 50,
+            yearFrom,
+            yearTo
+        )
+    ));
+
     const wheelRef = useRef<HTMLDivElement>(null);
     const wheelItemSize = wheelRef.current ? wheelRef.current.scrollHeight / wheelRef.current.childElementCount : null;
 
     const isScrollAllowedRef = useRef<boolean>(true);
 
     useEffect(() => {
-        if (flow === 'down') {
+        if (withScroll) {
             scrollTo(yearValuesArray.indexOf(year));
         }
-    }, [wheelItemSize, year])
+    }, [wheelItemSize, year]);
 
+    const intersectionObserverRef = useRef<Nullable<IntersectionObserver>>(null);
+    // Intersection Observer init
+    useEffect(() => {
+        if (!wheelRef.current) return;
+
+        const options = {
+            root: wheelRef.current,
+            rootMargin: '0px',
+            threshold: 1.0
+        }
+
+        const callback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+            let isIntersection = false;
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    isIntersection = true;
+                    observer.unobserve(entry.target);
+
+                    setYearValuesArray((prev) => {
+                        const isUpscrolling = parseInt(entry.target.textContent!) < getArrayMiddleElement(prev);
+
+                        if (isUpscrolling) {
+                            return [
+                                ...createYearValuesArray(
+                                    prev[0] - 50,
+                                    prev[0] - 1,
+                                    yearFrom,
+                                    yearTo
+                                ),
+                                ...prev.slice(0, -50)
+                            ]
+                        } else {
+                            return [
+                                ...prev.slice(50),
+                                ...createYearValuesArray(
+                                    prev[prev.length - 1] + 1,
+                                    prev[prev.length - 1] + 50,
+                                    yearFrom,
+                                    yearTo
+                                )
+                            ]
+                        }
+                    })
+
+                }
+            })
+
+            if (isIntersection) {
+                entries.forEach(entry => observer.unobserve(entry.target));
+            }
+        }
+
+        const observer = new IntersectionObserver(callback, options);
+        intersectionObserverRef.current = observer;
+
+        return () => {
+            observer.disconnect();
+        }
+    }, [wheelRef])
+
+    // Intersection Observer target change on list of years change
+    useEffect(() => {
+        if (!intersectionObserverRef.current || !wheelRef.current) return;
+        const childLength = wheelRef.current.children.length;
+
+        if (childLength < 85) return;
+
+        const observer = intersectionObserverRef.current;
+        const upperChild = wheelRef.current.children[19];
+        const lowerChild = wheelRef.current.children[childLength - 20];
+        console.log('intersection change', upperChild, lowerChild);
+
+        observer.observe(upperChild);
+        observer.observe(lowerChild);
+
+    }, [intersectionObserverRef, yearValuesArray])
 
     function scrollTo(index: number) {
         if (wheelRef.current) {
@@ -225,7 +313,7 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     date,
     changeDate,
 
-    flow,
+    withScroll,
 
     dateFrom,
     dateTo,
@@ -237,13 +325,17 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     const year = date.getFullYear();
     const month = date.getMonth();
 
-    const createMonthValuesArrayMemo = useCallback(createMonthValuesArray, [year]);
+    const isEdgeYear = (
+        dateFrom?.getFullYear() === date.getFullYear() ||
+        dateTo?.getFullYear() === date.getFullYear()
+    )
+    const createMonthValuesArrayMemo = useCallback(createMonthValuesArray, [isEdgeYear]);
     const monthValuesArray = createMonthValuesArrayMemo(date, dateFrom, dateTo);
 
     const isScrollAllowedRef = useRef<boolean>(true);
 
     useEffect(() => {
-        if (flow === 'down') {
+        if (withScroll) {
             scrollTo(monthValuesArray.indexOf(month));
         }
     }, [wheelItemSize, date])
@@ -272,22 +364,35 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     }
 
     function changeDateMonth (month: number) {
-        const newDate = new Date(copyDate(date).setMonth(month));
+        const newDate = new Date(date.getFullYear(), month, 1);
+        const daysAmount = getMonthDaysAmount(month, date.getFullYear());
+        let withScroll = false;
+
+        if (date.getDate() > daysAmount) {
+            newDate.setDate(daysAmount);
+            withScroll = true;
+        } else {
+            newDate.setDate(date.getDate());
+        }
+
         if (dateFrom && newDate < dateFrom) {
-            newDate.setMonth(dateFrom.getMonth())
+            newDate.setMonth(dateFrom.getMonth());
+            withScroll = true;
         }
         if (dateFrom && newDate < dateFrom) {
-            newDate.setDate(dateFrom.getDate())
+            newDate.setDate(dateFrom.getDate());
         }
 
         if (dateTo && newDate > dateTo) {
-            newDate.setMonth(dateTo.getMonth())
+            newDate.setMonth(dateTo.getMonth());
+            withScroll = true;
         }
         if (dateTo && newDate > dateTo) {
-            newDate.setDate(dateTo.getDate())
+            newDate.setDate(dateTo.getDate());
         }
+        console.log(getStringFromDate(newDate), 'withScroll: ', withScroll);
 
-        changeDate(newDate)
+        changeDate(newDate, withScroll);
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, month: number) {
@@ -382,7 +487,7 @@ const DayWheel: React.FC<WheelProps> =({
     date,
     changeDate,
 
-    flow,
+    withScroll,
 
     dateFrom,
     dateTo
@@ -401,7 +506,7 @@ const DayWheel: React.FC<WheelProps> =({
 
     // initialize date
     useEffect(() => {
-        if (flow === 'down') {
+        if (withScroll) {
             scrollTo(dayValuesArray.indexOf(day));
         }
     }, [wheelItemSize, date])
@@ -521,10 +626,10 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         sizes
 }) => {
     const [dateState, setDateState] = useState<
-        {value: Date, flow: 'up' | 'down'}
+        {value: Date, withScroll: boolean}
     >({
         value: initialDate ? initialDate : new Date(),
-        flow: 'down'
+        withScroll: true
     });
 
     const fontSize = sizes.height*5/12; // all the sizes depend on fontSize
@@ -532,15 +637,16 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         useEffect(() => {
         setDateState({
             value: date,
-            flow: 'down'
+            withScroll: true
         })
     }, [date]);
 
-    const changeDate = (date: Date) => {
+    const changeDate = (date: Date, withScroll: boolean = false) => {
         setDateState({
             value: date,
-            flow: 'up'
+            withScroll: withScroll
         })
+
         onDatePickerChange(date);
     }
 
@@ -552,14 +658,14 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
              style={{fontSize: `${fontSize}px`}} // you are not to change it!.. please(?)
         >
             <DayWheel date={dateState.value}
-                      flow={dateState.flow}
+                      withScroll={dateState.withScroll}
 
                       changeDate={changeDate}
                       dateFrom={dateFrom}
                       dateTo={dateTo}
             />
             <MonthWheel date={dateState.value}
-                        flow={dateState.flow}
+                        withScroll={dateState.withScroll}
 
                         changeDate={changeDate}
                         dateFrom={dateFrom}
@@ -568,7 +674,7 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                         isFullName={(sizes.width / sizes.height) > 5}
             />
             <YearWheel date={dateState.value}
-                       flow={dateState.flow}
+                       withScroll={dateState.withScroll}
 
                        changeDate={changeDate}
                        dateFrom={dateFrom}
