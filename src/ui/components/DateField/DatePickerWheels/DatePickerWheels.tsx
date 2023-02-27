@@ -101,83 +101,6 @@ const YearWheel: React.FC<WheelProps> = ({
         }
     }, [wheelItemSize, year]);
 
-    const intersectionObserverRef = useRef<Nullable<IntersectionObserver>>(null);
-    // Intersection Observer init
-    useEffect(() => {
-        if (!wheelRef.current) return;
-
-        const options = {
-            root: wheelRef.current,
-            rootMargin: '0px',
-            threshold: 1.0
-        }
-
-        const callback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
-            let isIntersection = false;
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    isIntersection = true;
-                    observer.unobserve(entry.target);
-
-                    setYearValuesArray((prev) => {
-                        const isUpscrolling = parseInt(entry.target.textContent!) < getArrayMiddleElement(prev);
-
-                        if (isUpscrolling) {
-                            return [
-                                ...createYearValuesArray(
-                                    prev[0] - 50,
-                                    prev[0] - 1,
-                                    yearFrom,
-                                    yearTo
-                                ),
-                                ...prev.slice(0, -50)
-                            ]
-                        } else {
-                            return [
-                                ...prev.slice(50),
-                                ...createYearValuesArray(
-                                    prev[prev.length - 1] + 1,
-                                    prev[prev.length - 1] + 50,
-                                    yearFrom,
-                                    yearTo
-                                )
-                            ]
-                        }
-                    })
-
-                }
-            })
-
-            if (isIntersection) {
-                entries.forEach(entry => observer.unobserve(entry.target));
-            }
-        }
-
-        const observer = new IntersectionObserver(callback, options);
-        intersectionObserverRef.current = observer;
-
-        return () => {
-            observer.disconnect();
-        }
-    }, [wheelRef])
-
-    // Intersection Observer target change on list of years change
-    useEffect(() => {
-        if (!intersectionObserverRef.current || !wheelRef.current) return;
-        const childLength = wheelRef.current.children.length;
-
-        if (childLength < 85) return;
-
-        const observer = intersectionObserverRef.current;
-        const upperChild = wheelRef.current.children[19];
-        const lowerChild = wheelRef.current.children[childLength - 20];
-        console.log('intersection change', upperChild, lowerChild);
-
-        observer.observe(upperChild);
-        observer.observe(lowerChild);
-
-    }, [intersectionObserverRef, yearValuesArray])
-
     function scrollTo(index: number) {
         if (wheelRef.current) {
             isScrollAllowedRef.current = false;
@@ -447,8 +370,8 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
                             styles.item
                         )}
                         key={value}
-                        onClick={(e) => {
-                            handleClick(e, value);
+                        onClick={(event) => {
+                            handleClick(event, value);
                         }}
                     >{isFullName ? months[value].name : months[value].short}</div>
                 })}
@@ -496,7 +419,18 @@ const DayWheel: React.FC<WheelProps> =({
     const month = date.getMonth();
     const year = date.getFullYear();
 
-    const createDayValuesArrayMemo = useCallback(createDayValuesArray, [month, year]);
+    const isEdgeYearAndMonth = (
+        (
+            dateFrom &&
+            month === dateFrom.getMonth() &&
+            year === dateFrom.getFullYear()
+        ) || (
+            dateTo &&
+            month === dateTo.getMonth() &&
+            year === dateTo.getFullYear()
+        )
+    )
+    const createDayValuesArrayMemo = useCallback(createDayValuesArray, [isEdgeYearAndMonth]);
     const dayValuesArray = createDayValuesArrayMemo(date, dateFrom, dateTo);
 
     const wheelRef = useRef<HTMLDivElement>(null);
