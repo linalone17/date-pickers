@@ -36,11 +36,13 @@ interface DatePickerProps {
     }
 }
 
+type Committer = 'DatePicker' | 'DayWheel' | 'MonthWheel' | 'YearWheel'
+
 interface WheelProps {
     date: Date;
-    withScroll: boolean;
+    committer: Committer;
 
-    changeDate: (date: Date, withScroll?: boolean) => void;
+    changeDate: (date: Date, committer?: Committer) => void;
     dateFrom?: Date;
     dateTo?: Date;
 }
@@ -70,7 +72,7 @@ const YearWheel: React.FC<WheelProps> = ({
     date,
     changeDate,
 
-    withScroll,
+    committer,
 
     dateFrom,
     dateTo
@@ -96,7 +98,7 @@ const YearWheel: React.FC<WheelProps> = ({
     const isScrollAllowedRef = useRef<boolean>(true);
 
     useEffect(() => {
-        if (withScroll) {
+        if (committer !== 'YearWheel') {
             scrollTo(yearValuesArray.indexOf(year));
         }
     }, [wheelItemSize, year]);
@@ -153,7 +155,7 @@ const YearWheel: React.FC<WheelProps> = ({
             newDate.setDate(dateTo.getDate())
         }
 
-        changeDate(newDate)
+        changeDate(newDate, 'YearWheel');
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, year: number) {
@@ -236,7 +238,7 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     date,
     changeDate,
 
-    withScroll,
+    committer,
 
     dateFrom,
     dateTo,
@@ -258,7 +260,7 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     const isScrollAllowedRef = useRef<boolean>(true);
 
     useEffect(() => {
-        if (withScroll) {
+        if (committer !== 'MonthWheel') {
             scrollTo(monthValuesArray.indexOf(month));
         }
     }, [wheelItemSize, date])
@@ -289,18 +291,18 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     function changeDateMonth (month: number) {
         const newDate = new Date(date.getFullYear(), month, 1);
         const daysAmount = getMonthDaysAmount(month, date.getFullYear());
-        let withScroll = false;
+        // let withScroll = false;
 
         if (date.getDate() > daysAmount) {
             newDate.setDate(daysAmount);
-            withScroll = true;
+            // withScroll = true;
         } else {
             newDate.setDate(date.getDate());
         }
 
         if (dateFrom && newDate < dateFrom) {
             newDate.setMonth(dateFrom.getMonth());
-            withScroll = true;
+            // withScroll = true;
         }
         if (dateFrom && newDate < dateFrom) {
             newDate.setDate(dateFrom.getDate());
@@ -308,14 +310,14 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
 
         if (dateTo && newDate > dateTo) {
             newDate.setMonth(dateTo.getMonth());
-            withScroll = true;
+            // withScroll = true;
         }
         if (dateTo && newDate > dateTo) {
             newDate.setDate(dateTo.getDate());
         }
-        console.log(getStringFromDate(newDate), 'withScroll: ', withScroll);
+        // console.log(getStringFromDate(newDate));
 
-        changeDate(newDate, withScroll);
+        changeDate(newDate, 'MonthWheel');
     }
 
     function handleClick (event: React.UIEvent<HTMLDivElement>, month: number) {
@@ -410,7 +412,7 @@ const DayWheel: React.FC<WheelProps> =({
     date,
     changeDate,
 
-    withScroll,
+    committer,
 
     dateFrom,
     dateTo
@@ -440,7 +442,7 @@ const DayWheel: React.FC<WheelProps> =({
 
     // initialize date
     useEffect(() => {
-        if (withScroll) {
+        if (committer !== 'DayWheel') {
             scrollTo(dayValuesArray.indexOf(day));
         }
     }, [wheelItemSize, date])
@@ -479,7 +481,7 @@ const DayWheel: React.FC<WheelProps> =({
         if (dateTo && newDate > dateTo) {
             newDate.setDate(dateTo.getDate())
         }
-        changeDate(newDate)
+        changeDate(newDate, 'DayWheel')
     }
 
     function handleScroll (event: React.UIEvent<HTMLDivElement>) {
@@ -560,25 +562,25 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
         sizes
 }) => {
     const [dateState, setDateState] = useState<
-        {value: Date, withScroll: boolean}
+        {value: Date, committer: Committer}
     >({
         value: initialDate ? initialDate : new Date(),
-        withScroll: true
+        committer: 'DatePicker'
     });
 
     const fontSize = sizes.height*5/12; // all the sizes depend on fontSize
 
-        useEffect(() => {
+    useEffect(() => {
         setDateState({
             value: date,
-            withScroll: true
+            committer: 'DatePicker'
         })
     }, [date]);
 
-    const changeDate = (date: Date, withScroll: boolean = false) => {
+    const changeDate = (date: Date, committer: Committer = 'DatePicker') => {
         setDateState({
             value: date,
-            withScroll: withScroll
+            committer
         })
 
         onDatePickerChange(date);
@@ -592,14 +594,14 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
              style={{fontSize: `${fontSize}px`}} // you are not to change it!.. please(?)
         >
             <DayWheel date={dateState.value}
-                      withScroll={dateState.withScroll}
+                      committer={dateState.committer}
 
                       changeDate={changeDate}
                       dateFrom={dateFrom}
                       dateTo={dateTo}
             />
             <MonthWheel date={dateState.value}
-                        withScroll={dateState.withScroll}
+                        committer={dateState.committer}
 
                         changeDate={changeDate}
                         dateFrom={dateFrom}
@@ -608,7 +610,7 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
                         isFullName={(sizes.width / sizes.height) > 5}
             />
             <YearWheel date={dateState.value}
-                       withScroll={dateState.withScroll}
+                       committer={dateState.committer}
 
                        changeDate={changeDate}
                        dateFrom={dateFrom}
