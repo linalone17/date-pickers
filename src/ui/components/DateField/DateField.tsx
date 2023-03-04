@@ -39,8 +39,7 @@ function normalizeRawInputValue(newValue: string, oldValue:string): string | voi
         return;
 
     } else if (newValue === '.') {                             // '.' => '04.', where 04 - today
-        newValue = `${new Date().getDate()}.`;
-
+        newValue = String(new Date().getDate()).padStart(2, '0') + '.';
     } else if (                                                //  '123' => '12.3' fires on typing
         newValue.match(/^[0-9]{3}$/g) &&
         newValue.length > oldValue.length
@@ -140,7 +139,6 @@ export const DateField: React.FC<DateFieldProps> = ({
                 setRawInputValue(getStringFromDate(dateTo))
                 return;
             }
-            console.log('date in interval: ', value, date)
             setDatePickerProps(date);
             setRawInputValue(value);
         }

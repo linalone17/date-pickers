@@ -60,7 +60,6 @@ function createYearValuesArray(yearFrom: number, yearTo: number, yearFromThresho
     if (yearToThreshold && intervalEnd > yearToThreshold) {
         intervalEnd = yearToThreshold;
     }
-    console.log(intervalStart, intervalEnd);
 
     return createArrayFromInterval(intervalStart, intervalEnd);
 }
