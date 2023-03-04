@@ -28,14 +28,15 @@ export default function App () {
         <div className={styles.App}>
             <h1>Wheels</h1>
             <div className={styles.mark}>
-                <div>standard</div>
+                <div className={styles.type}>standard</div>
+                <div className={styles.addition}>14.05.2022 - 06.06.2024</div>
             </div>
             <DateField initialDate={new Date()}
                        dateFrom={new Date(2022, 4, 14)}
                        dateTo={new Date(2024, 5, 6)}
                        variant={'wheels'}/>
             <div className={styles.mark}>
-                <div>short / less width</div>
+                <div className={styles.type}>short / less width</div>
             </div>
             <DateField initialDate={new Date()}
                        variant={'wheels'}
@@ -45,7 +46,7 @@ export default function App () {
                        }}
             />
             <div className={styles.mark}>
-                <div>smaller size</div>
+                <div className={styles.type}>smaller size</div>
             </div>
             <DateField initialDate={new Date()}
                        variant={'wheels'}
@@ -55,7 +56,7 @@ export default function App () {
                        }}
             />
             <div className={styles.mark}>
-                <div>Custom size</div>
+                <div className={styles.type}>Custom size</div>
             </div>
             <div className={styles.options}>
                 <div className={styles.size}>

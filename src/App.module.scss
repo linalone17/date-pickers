@@ -83,13 +83,18 @@ body {
 
   .mark {
     display: flex;
+    align-items: center;
+    justify-content: left;
     //float: left;
-    div {
+    .type {
       background-color: $mediumDark;
       border: 3px solid $lessDark;
       border-radius: 10px;
       padding: 8px;
       font-weight: 600;
+    }
+    .addition {
+      color: #858f9d;
     }
     padding-top: 50px;
   }

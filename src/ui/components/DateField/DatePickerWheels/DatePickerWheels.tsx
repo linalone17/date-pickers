@@ -4,15 +4,11 @@ import {
     getMonthDaysAmount,
     copyDate,
     getWeekDayName,
-    getStringFromDate
 } from '../../../utils';
 
 import {
     createArrayFromInterval,
-    getArrayMiddleElement
 } from "../../../../shared/utils";
-
-import {Nullable} from "../../../../shared/typings/utils";
 
 import {months} from "../../../constants";
 
@@ -40,9 +36,10 @@ type Committer = 'DatePicker' | 'DayWheel' | 'MonthWheel' | 'YearWheel'
 
 interface WheelProps {
     date: Date;
+    changeDate: (date: Date, committer?: Committer) => void;
+
     committer: Committer;
 
-    changeDate: (date: Date, committer?: Committer) => void;
     dateFrom?: Date;
     dateTo?: Date;
 }
@@ -232,7 +229,6 @@ function createMonthValuesArray(date: Date, dateFrom?: Date, dateTo?: Date): Arr
 
     return createArrayFromInterval(monthFrom, monthTo);
 }
-// const monthValuesArray: Array<number> = createArrayFromInterval(0, 11);
 
 const MonthWheel: React.FC<MonthWheelProps> = ({
     date,
@@ -291,18 +287,15 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
     function changeDateMonth (month: number) {
         const newDate = new Date(date.getFullYear(), month, 1);
         const daysAmount = getMonthDaysAmount(month, date.getFullYear());
-        // let withScroll = false;
 
         if (date.getDate() > daysAmount) {
             newDate.setDate(daysAmount);
-            // withScroll = true;
         } else {
             newDate.setDate(date.getDate());
         }
 
         if (dateFrom && newDate < dateFrom) {
             newDate.setMonth(dateFrom.getMonth());
-            // withScroll = true;
         }
         if (dateFrom && newDate < dateFrom) {
             newDate.setDate(dateFrom.getDate());
@@ -310,12 +303,10 @@ const MonthWheel: React.FC<MonthWheelProps> = ({
 
         if (dateTo && newDate > dateTo) {
             newDate.setMonth(dateTo.getMonth());
-            // withScroll = true;
         }
         if (dateTo && newDate > dateTo) {
             newDate.setDate(dateTo.getDate());
         }
-        // console.log(getStringFromDate(newDate));
 
         changeDate(newDate, 'MonthWheel');
     }
@@ -594,25 +585,28 @@ export const DatePickerWheels: React.FC<DatePickerProps> = ({
              style={{fontSize: `${fontSize}px`}} // you are not to change it!.. please(?)
         >
             <DayWheel date={dateState.value}
+                      changeDate={changeDate}
+
                       committer={dateState.committer}
 
-                      changeDate={changeDate}
                       dateFrom={dateFrom}
                       dateTo={dateTo}
             />
             <MonthWheel date={dateState.value}
+                        changeDate={changeDate}
+
                         committer={dateState.committer}
 
-                        changeDate={changeDate}
                         dateFrom={dateFrom}
                         dateTo={dateTo}
 
                         isFullName={(sizes.width / sizes.height) > 5}
             />
             <YearWheel date={dateState.value}
+                       changeDate={changeDate}
+
                        committer={dateState.committer}
 
-                       changeDate={changeDate}
                        dateFrom={dateFrom}
                        dateTo={dateTo}
 
