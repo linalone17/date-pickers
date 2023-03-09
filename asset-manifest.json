@@ -1,13 +1,14 @@
 {
   "files": {
-    "main.css": "/date-pickers/static/css/main.fbf1aa3e.css",
-    "main.js": "/date-pickers/static/js/main.fc3b59f6.js",
+    "main.css": "/date-pickers/static/css/main.6a371e70.css",
+    "main.js": "/date-pickers/static/js/main.acbb0272.js",
     "index.html": "/date-pickers/index.html",
-    "main.fbf1aa3e.css.map": "/date-pickers/static/css/main.fbf1aa3e.css.map",
-    "main.fc3b59f6.js.map": "/date-pickers/static/js/main.fc3b59f6.js.map"
+    "static/media/calendar.svg": "/date-pickers/static/media/calendar.ba0f30b0d5b6f519871c26db7e2270df.svg",
+    "main.6a371e70.css.map": "/date-pickers/static/css/main.6a371e70.css.map",
+    "main.acbb0272.js.map": "/date-pickers/static/js/main.acbb0272.js.map"
   },
   "entrypoints": [
-    "static/css/main.fbf1aa3e.css",
-    "static/js/main.fc3b59f6.js"
+    "static/css/main.6a371e70.css",
+    "static/js/main.acbb0272.js"
   ]
 }
